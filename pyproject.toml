@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "vanilla_option_pricers"
+version = "1.0.2"
+description = "Implementation of fast options pricers and risk for Black-Scholes-Merton and Bachelier normal models"
+license = "LICENSE.txt"
+authors = ["Artur Sepp <artursepp@gmail.com>"]
+maintainers = ["Artur Sepp <artursepp@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/ArturSepp/VanillaOptionPricers"
+documentation = "https://github.com/ArturSepp/VanillaOptionPricers"
+keywords= ["Black-Scholes", "Black-Scholes-Merton", "Bachelier", "option pricing", "option delta"]
+classifiers=[
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Intended Audience :: Financial and Insurance Industry",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3 :: Only",
+        "Topic :: Office/Business :: Financial :: Investment",
+    ]
+packages = [ {include = "vanilla_option_pricers"} ]
+
+[tool.poetry.urls]
+"Issues" = "https://github.com/ArturSepp/VanillaOptionPricers/issues"
+"Personal website" = "https://artursepp.com"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+numba = ">=0.56.4"
+numpy = ">=1.22.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
