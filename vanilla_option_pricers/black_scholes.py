@@ -301,7 +301,6 @@ Gamma
 ****************************
 """
 
-
 @njit
 def compute_bsm_vanilla_gamma(ttm: float,
                               forward: float,
@@ -425,24 +424,26 @@ def infer_bsm_implied_vol(forward: float,
                           discfactor: float = 1.0,
                           optiontype: str = 'C',
                           tol: float = 1e-16,
+                          x_lower: float = 0.01,
+                          x_upper: float = 5.0,
+                          max_iters: int = 200,
                           is_bounds_to_nan: bool = True
                           ) -> float:
     """
-    compute Black implied vol
+    compute Black implied vol using bisection on [x_lower, x_upper]
     """
-    x1, x2 = 0.01, 5.0  # starting values
-    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x1, discfactor=discfactor, optiontype=optiontype) - given_price
-    fmid = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x2, discfactor=discfactor, optiontype=optiontype) - given_price
+    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x_lower, discfactor=discfactor, optiontype=optiontype) - given_price
+    fmid = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x_upper, discfactor=discfactor, optiontype=optiontype) - given_price
 
     if f*fmid < 0.0:
         if f < 0.0:
-            rtb = x1
-            dx = x2-x1
+            rtb = x_lower
+            dx = x_upper-x_lower
         else:
-            rtb = x2
-            dx = x1-x2
+            rtb = x_upper
+            dx = x_lower-x_upper
         xmid = rtb
-        for j in range(0, 200):
+        for j in range(0, max_iters):
             dx = dx*0.5
             xmid = rtb+dx
             fmid = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=xmid, discfactor=discfactor, optiontype=optiontype) - given_price
@@ -452,14 +453,14 @@ def infer_bsm_implied_vol(forward: float,
                 break
         v1 = xmid
 
-    else:
+    else: # no solution: fixxed to lower bound
         if f < 0.0:
-            v1 = x1
+            v1 = x_lower
         else:
-            v1 = x2
+            v1 = x_upper
 
     if is_bounds_to_nan:  # in case vol was inferred it will return nan
-        if np.abs(v1-x1) < tol or np.abs(v1-x2) < tol:
+        if np.abs(v1-x_lower) < tol or np.abs(v1-x_upper) < tol:
             v1 = np.nan
     return v1
 
@@ -514,7 +515,6 @@ def infer_bsm_ivols_from_model_chain_prices(ttms: np.ndarray,
 Digital prices
 ********************************************
 """
-
 
 @njit
 def compute_bsm_digital_price(forward: float,
