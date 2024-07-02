@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vanilla_option_pricers"
-version = "1.0.3"
+version = "1.0.4"
 description = "Implementation of fast options pricers and risk for Black-Scholes-Merton and Bachelier normal models"
 license = "LICENSE.txt"
 authors = ["Artur Sepp <artursepp@gmail.com>"]

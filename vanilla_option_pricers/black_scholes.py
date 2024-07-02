@@ -405,14 +405,24 @@ def infer_bsm_ivols_from_model_slice_prices(ttm: float,
                                             strikes: np.ndarray,
                                             optiontypes: np.ndarray,
                                             model_prices: np.ndarray,
-                                            discfactor: float
+                                            discfactor: float,
+                                            vol_lower: float = 0.01,
+                                            vol_upper: float = 5.0,
+                                            max_iters: int = 200,
+                                            is_bounds_to_nan: bool = True
                                             ) -> np.ndarray:
     model_vol_ttm = np.zeros_like(strikes)
     for idx, (strike, model_price, optiontype) in enumerate(zip(strikes, model_prices, optiontypes)):
-        model_vol_ttm[idx] = infer_bsm_implied_vol(forward=forward, ttm=ttm, discfactor=discfactor,
-                                                   given_price=model_price,
-                                                   strike=strike,
-                                                   optiontype=optiontype)
+        if np.isnan(model_price) or np.isclose(model_price, 0.0):
+            model_vol_ttm[idx] = np.nan if is_bounds_to_nan else vol_lower
+        else:
+            model_vol_ttm[idx] = infer_bsm_implied_vol(forward=forward, ttm=ttm, discfactor=discfactor,
+                                                       given_price=model_price,
+                                                       strike=strike,
+                                                       optiontype=optiontype,
+                                                       vol_lower=vol_lower,
+                                                       vol_upper=vol_upper,
+                                                       max_iters=max_iters)
     return model_vol_ttm
 
 
@@ -424,24 +434,24 @@ def infer_bsm_implied_vol(forward: float,
                           discfactor: float = 1.0,
                           optiontype: str = 'C',
                           tol: float = 1e-16,
-                          x_lower: float = 0.01,
-                          x_upper: float = 5.0,
+                          vol_lower: float = 0.01,
+                          vol_upper: float = 5.0,
                           max_iters: int = 200,
                           is_bounds_to_nan: bool = True
                           ) -> float:
     """
     compute Black implied vol using bisection on [x_lower, x_upper]
     """
-    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x_lower, discfactor=discfactor, optiontype=optiontype) - given_price
-    fmid = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=x_upper, discfactor=discfactor, optiontype=optiontype) - given_price
+    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=optiontype) - given_price
+    fmid = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=optiontype) - given_price
 
     if f*fmid < 0.0:
         if f < 0.0:
-            rtb = x_lower
-            dx = x_upper-x_lower
+            rtb = vol_lower
+            dx = vol_upper - vol_lower
         else:
-            rtb = x_upper
-            dx = x_lower-x_upper
+            rtb = vol_upper
+            dx = vol_lower - vol_upper
         xmid = rtb
         for j in range(0, max_iters):
             dx = dx*0.5
@@ -455,12 +465,12 @@ def infer_bsm_implied_vol(forward: float,
 
     else: # no solution: fixxed to lower bound
         if f < 0.0:
-            v1 = x_lower
+            v1 = vol_lower
         else:
-            v1 = x_upper
+            v1 = vol_upper
 
     if is_bounds_to_nan:  # in case vol was inferred it will return nan
-        if np.abs(v1-x_lower) < tol or np.abs(v1-x_upper) < tol:
+        if np.abs(v1 - vol_lower) < tol or np.abs(v1 - vol_upper) < tol:
             v1 = np.nan
     return v1
 
