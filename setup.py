@@ -16,7 +16,7 @@ requirements = read_requirements("requirements.txt")
 
 setup(
     name='vanilla_option_pricers',
-    version='1.0.4',
+    version='1.1.1',
     author='Artur Sepp',
     author_email='artursepp@gmail.com',
     url='https://github.com/ArturSepp/VanillaOptionPricers',
