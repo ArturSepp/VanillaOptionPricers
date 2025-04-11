@@ -35,3 +35,8 @@ from vanilla_option_pricers.bachelier import (
     infer_normal_ivols_from_model_slice_prices,
     infer_normal_ivols_from_slice_prices,
 )
+
+from vanilla_option_pricers.utils import (
+    ncdf,
+    npdf
+)
