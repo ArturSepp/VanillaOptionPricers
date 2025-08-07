@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanilla-option-pricers"
-version = "1.2.1"
+version = "1.2.2"
 description = "Fast and vectorised pricer and implied volatility fitters for Black-Scholes and Merton models"
 readme = "README.md"
 license = {file = "LICENSE.txt"}

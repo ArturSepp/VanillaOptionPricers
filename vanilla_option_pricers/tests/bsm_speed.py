@@ -47,23 +47,22 @@ def test_vector_vs_loop(size: int = 1000):
     print(f"spot_grid using numba: avg={timeit.Timer(spot_grid).timeit(n)/n:.4f}")
 
 
-class UnitTests(Enum):
+class LocalTests(Enum):
     VECTOR_VS_LOOP = 1
 
 
-def run_unit_test(unit_test: UnitTests):
+def run_local_test(local_test: LocalTests):
+    """Run local tests for development and debugging purposes.
+
+    These are integration tests that download real data and generate reports.
+    Use for quick verification during development.
+    """
     np.random.seed(3)
-    if unit_test == UnitTests.VECTOR_VS_LOOP:
+
+    if local_test == LocalTests.VECTOR_VS_LOOP:
         test_vector_vs_loop(size=10000)
 
 
 if __name__ == '__main__':
 
-    unit_test = UnitTests.VECTOR_VS_LOOP
-
-    is_run_all_tests = False
-    if is_run_all_tests:
-        for unit_test in UnitTests:
-            run_unit_test(unit_test=unit_test)
-    else:
-        run_unit_test(unit_test=unit_test)
+    run_local_test(local_test=LocalTests.VECTOR_VS_LOOP)
