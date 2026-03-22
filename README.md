@@ -3,6 +3,10 @@
 [![PyPI Version](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
 [![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/LICENSE)
+
+| CI Status | [![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg)](https://github.com/ArturSepp/VanillaOptionPricers/actions) |
+
+
 [![GitHub Stars](https://img.shields.io/github/stars/ArturSepp/VanillaOptionPricers?style=flat-square&logo=github)](https://github.com/ArturSepp/VanillaOptionPricers)
 [![GitHub Forks](https://img.shields.io/github/forks/ArturSepp/VanillaOptionPricers?style=flat-square&logo=github)](https://github.com/ArturSepp/VanillaOptionPricers)
 [![Monthly Downloads](https://pepy.tech/badge/vanilla-option-pricers/month)](https://pepy.tech/project/vanilla-option-pricers)
