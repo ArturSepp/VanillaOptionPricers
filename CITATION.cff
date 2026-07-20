@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "VanillaOptionPricers: Fast and vectorized option pricers and implied volatility fitters for Black-Scholes-Merton and Bachelier models"
+authors:
+  - family-names: Sepp
+    given-names: Artur
+repository-code: "https://github.com/ArturSepp/VanillaOptionPricers"
+url: "https://pypi.org/project/vanilla-option-pricers/"
+license: MIT
+version: 1.2.2
+date-released: "2026-03-22"
+keywords:
+  - option-pricing
+  - implied-volatility
+  - black-scholes-merton
+  - bachelier
+  - numba
+  - quantitative-finance
+  - python
