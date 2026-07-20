@@ -1,20 +1,19 @@
-# VanillaOptionPricers
+# VanillaOptionPricers (`vanilla-option-pricers`)
 
-[![PyPI Version](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
+**Fast and vectorized option pricers and implied volatility fitters for Black-Scholes-Merton and Bachelier models**
+
+[![PyPI](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
+[![Python](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
 [![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/LICENSE)
-
-| CI Status | [![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg)](https://github.com/ArturSepp/VanillaOptionPricers/actions) |
-
-
-[![GitHub Stars](https://img.shields.io/github/stars/ArturSepp/VanillaOptionPricers?style=flat-square&logo=github)](https://github.com/ArturSepp/VanillaOptionPricers)
-[![GitHub Forks](https://img.shields.io/github/forks/ArturSepp/VanillaOptionPricers?style=flat-square&logo=github)](https://github.com/ArturSepp/VanillaOptionPricers)
-[![Monthly Downloads](https://pepy.tech/badge/vanilla-option-pricers/month)](https://pepy.tech/project/vanilla-option-pricers)
-[![Weekly Downloads](https://pepy.tech/badge/vanilla-option-pricers/week)](https://pepy.tech/project/vanilla-option-pricers)
-
-**Fast and vectorized option pricers and implied volatility fitters for Black-Scholes and Merton models**
+[![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg)](https://github.com/ArturSepp/VanillaOptionPricers/actions)
+[![Downloads](https://static.pepy.tech/badge/vanilla-option-pricers)](https://pepy.tech/project/vanilla-option-pricers)
+[![Monthly](https://static.pepy.tech/badge/vanilla-option-pricers/month)](https://pepy.tech/project/vanilla-option-pricers)
 
 VanillaOptionPricers is a high-performance Python package that provides fast, vectorized implementations of option pricing models and implied volatility calculations. Built with Numba for optimal performance, this package is designed for quantitative analysts, traders, and researchers who need efficient option pricing capabilities.
+
+## Why vanilla-option-pricers
+
+Research pipelines rarely need a derivatives library — they need Black-Scholes-Merton and Bachelier prices and implied volatilities for large arrays of strikes, expiries, and underlyings, fast enough to sit inside a calibration loop, a surface fitter, or a Monte Carlo post-processor. Full pricing frameworks deliver this behind heavy dependency trees and object hierarchies; textbook scipy implementations deliver it one option at a time. `vanilla-option-pricers` implements just the closed forms, JIT-compiled and vectorised with Numba over numpy arrays, with two runtime dependencies.
 
 ## Key Features
 
@@ -24,6 +23,19 @@ VanillaOptionPricers is a high-performance Python package that provides fast, ve
 - **Option Types**: Support for vanilla calls, puts, and inverse options
 - **Minimal Dependencies**: Lightweight with core dependencies on NumPy and Numba only
 - **Easy Integration**: Simple API for seamless integration into existing workflows
+
+## What makes it different
+
+- **Log-normal and normal models side by side.** Black-Scholes-Merton for equities and FX; Bachelier normal quoting for rates and spread underlyings where negative forwards and normal vols are the market convention.
+- **Implied volatility as a first-class fitter.** Vectorised IV inversion designed for full option chains rather than scalar root-finding in a loop.
+- **Inverse options.** Coin-denominated inverse calls and puts (`'IC'`/`'IP'`) as traded on cryptocurrency derivatives exchanges — a payoff type largely absent from standard open-source pricers; see Lucic, V. and Sepp, A. (2024), *Valuation and Hedging of Cryptocurrency Inverse Options*, Quantitative Finance, 24(7), 851–869, for the theory.
+- **Two dependencies.** numpy and numba. No object hierarchy, no calendar machinery — every function takes arrays in and returns arrays out.
+
+## When to use it — and when not
+
+Use `vanilla-option-pricers` when you need array-valued vanilla prices and implied vols at speed inside research code: option-chain snapshots, vol-surface preprocessing, simulation post-processing, or calibration objectives.
+
+It is deliberately not a derivatives framework: no American or exotic payoffs, no term structures, no settlement conventions, and no stochastic volatility. For pricing and calibration under stochastic volatility, use [`stochvolmodels`](https://github.com/ArturSepp/StochVolModels); for portfolio-level analytics and reporting, use [`qis`](https://github.com/ArturSepp/QuantInvestStrats).
 
 ## Installation
 
@@ -162,6 +174,23 @@ VanillaOptionPricers is ideal for:
 - **Market Making**: High-frequency option pricing and implied volatility calculations
 - **Financial Education**: Teaching option pricing concepts with efficient implementations
 
+## Ecosystem
+
+This package is part of an open-source Python stack for quantitative finance — full catalogue at [github.com/ArturSepp](https://github.com/ArturSepp):
+
+| Package | Purpose |
+|---|---|
+| [`qis`](https://github.com/ArturSepp/QuantInvestStrats) | Performance analytics, factsheets, and visualisation |
+| [`optimalportfolios`](https://github.com/ArturSepp/OptimalPortfolios) | Portfolio construction and backtesting |
+| [`factorlasso`](https://github.com/ArturSepp/factorlasso) | Sparse factor models and factor covariance estimation |
+| [`bbg-fetch`](https://github.com/ArturSepp/BloombergFetch) | Bloomberg data fetching |
+| [`trendfollowing`](https://github.com/ArturSepp/TrendFollowingSystems) | Trend-following systems: closed-form theory and replication |
+| [`goal-based-allocation`](https://github.com/ArturSepp/GoalBasedAllocation) | Dynamic MV allocation under regime-switching jump-diffusions |
+| [`stochvolmodels`](https://github.com/ArturSepp/StochVolModels) | Stochastic volatility pricing analytics |
+| [`vanilla-option-pricers`](https://github.com/ArturSepp/VanillaOptionPricers) *(this package)* | Vectorised vanilla option pricers and implied volatility fitters |
+
+Dependency links within the stack: `optimalportfolios` builds on `qis` and `factorlasso`; `trendfollowing` builds on `qis`.
+
 ## Contributing
 
 We welcome contributions! Please feel free to submit issues, feature requests, or pull requests.
@@ -178,7 +207,7 @@ pip install -e .
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-***BibTeX Citation***
+## Citation
 
 If you use VanillaOptionPricers in your research, please cite it as:
 
