@@ -5,6 +5,7 @@ title: "VanillaOptionPricers: Fast and vectorized option pricers and implied vol
 authors:
   - family-names: Sepp
     given-names: Artur
+    orcid: "https://orcid.org/0000-0002-7038-1748"
 repository-code: "https://github.com/ArturSepp/VanillaOptionPricers"
 url: "https://pypi.org/project/vanilla-option-pricers/"
 license: MIT
