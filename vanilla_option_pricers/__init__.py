@@ -1,3 +1,13 @@
+"""
+vanilla-option-pricers: numba-vectorised Black-Scholes-Merton and Bachelier pricers,
+greeks, and implied-volatility solvers on the forward measure.
+
+Public API is the set of names exported below; everything else is internal and may
+change without a version bump.
+
+https://github.com/ArturSepp/VanillaOptionPricers
+"""
+
 from vanilla_option_pricers.black_scholes import (
     compute_bsm_vanilla_price,
     compute_bsm_vanilla_slice_deltas,
@@ -12,6 +22,8 @@ from vanilla_option_pricers.black_scholes import (
     compute_bsm_vanilla_deltas_ttms,
     compute_bsm_slice_vegas,
     compute_bsm_vegas_ttms,
+    compute_bsm_digital_price,
+    compute_bsm_digital_delta,
     infer_bsm_implied_vol,
     infer_bsm_ivols_from_model_chain_prices,
     infer_bsm_ivols_from_model_slice_prices,
