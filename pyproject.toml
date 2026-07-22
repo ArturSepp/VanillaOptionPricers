@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanilla-option-pricers"
-version = "1.2.3"
+version = "1.2.4"
 description = "Fast and vectorised pricer and implied volatility fitters for Black-Scholes and Bachelier models"
 readme = "README.md"
 license = {text = "MIT"}
@@ -25,7 +25,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -54,9 +53,6 @@ Issues = "https://github.com/ArturSepp/VanillaOptionPricers/issues"
 [tool.setuptools.packages.find]
 include = ["vanilla_option_pricers*"]
 exclude = ["tests*", "docs*"]
-
-[tool.setuptools.package-data]
-vanilla_option_pricers = ["*.yaml"]
 
 [tool.ruff]
 line-length = 100

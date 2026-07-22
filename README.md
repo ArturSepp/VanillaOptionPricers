@@ -4,25 +4,14 @@
 
 [![PyPI](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
 [![Python](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
-[![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/LICENSE.txt)
 [![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg)](https://github.com/ArturSepp/VanillaOptionPricers/actions)
 [![Downloads](https://static.pepy.tech/badge/vanilla-option-pricers)](https://pepy.tech/project/vanilla-option-pricers)
 [![Monthly](https://static.pepy.tech/badge/vanilla-option-pricers/month)](https://pepy.tech/project/vanilla-option-pricers)
 
-VanillaOptionPricers is a high-performance Python package that provides fast, vectorized implementations of option pricing models and implied volatility calculations. Built with Numba for optimal performance, this package is designed for quantitative analysts, traders, and researchers who need efficient option pricing capabilities.
-
 ## Why vanilla-option-pricers
 
 Research pipelines rarely need a derivatives library — they need Black-Scholes-Merton and Bachelier prices and implied volatilities for large arrays of strikes, expiries, and underlyings, fast enough to sit inside a calibration loop, a surface fitter, or a Monte Carlo post-processor. Full pricing frameworks deliver this behind heavy dependency trees and object hierarchies; textbook scipy implementations deliver it one option at a time. `vanilla-option-pricers` implements just the closed forms, JIT-compiled and vectorised with Numba over numpy arrays, with two runtime dependencies.
-
-## Key Features
-
-- **High Performance**: Vectorized implementations using Numba for maximum speed
-- **Multiple Models**: Support for Black-Scholes-Merton and Bachelier normal models
-- **Implied Volatility**: Fast and robust implied volatility solvers
-- **Option Types**: Support for vanilla calls, puts, and inverse options
-- **Minimal Dependencies**: Lightweight with core dependencies on NumPy and Numba only
-- **Easy Integration**: Simple API for seamless integration into existing workflows
 
 ## What makes it different
 
@@ -52,11 +41,11 @@ pip install --upgrade vanilla-option-pricers
 ## Requirements
 
 ### Core Dependencies
-- `python >= 3.8, < 3.11`
-- `numba >= 0.59.0`
-- `numpy >= 1.26.4`
+- `python >= 3.10`
+- `numba >= 0.60.0`
+- `numpy >= 2.0`
 
-The package maintains minimal dependencies on higher-level packages, ensuring fast installation and reduced compatibility issues.
+The two runtime dependencies are numpy and numba. There is no dependency on any higher-level analytics package.
 
 ## Supported Option Types
 
@@ -73,29 +62,42 @@ VanillaOptionPricers supports the following option types (passed as string param
 
 ### Basic Option Pricing
 
+Pricers are parametrised on the forward, not the spot: `forward = spot * exp((r - q) * ttm)`, and `discfactor = exp(-r * ttm)` discounts the forward-measure payoff to today.
+
 ```python
 import numpy as np
-from vanilla_option_pricers import black_scholes_price, implied_volatility
-
-# Define option parameters
-spot = 100.0          # Current underlying price
-strike = 105.0        # Strike price
-time_to_expiry = 0.25 # Time to expiration (in years)
-risk_free_rate = 0.05 # Risk-free interest rate
-volatility = 0.20     # Volatility
-option_type = 'C'     # Call option
-
-# Calculate option price
-option_price = black_scholes_price(
-    spot=spot,
-    strike=strike,
-    time_to_expiry=time_to_expiry,
-    risk_free_rate=risk_free_rate,
-    volatility=volatility,
-    option_type=option_type
+from vanilla_option_pricers import (
+    compute_bsm_vanilla_price,
+    compute_bsm_vanilla_delta,
+    compute_bsm_vanilla_theta_vector,
+    infer_bsm_implied_vol,
 )
 
-print(f"Option Price: ${option_price:.4f}")
+spot = 100.0
+strike = 105.0
+ttm = 0.25             # time to maturity, in years
+vol = 0.20             # annualised lognormal vol
+rate = 0.05            # continuously compounded rate
+forward = spot * np.exp(rate * ttm)
+discfactor = np.exp(-rate * ttm)
+
+price = compute_bsm_vanilla_price(forward=forward,
+                                  strike=strike,
+                                  ttm=ttm,
+                                  vol=vol,
+                                  optiontype='C',
+                                  discfactor=discfactor)
+delta = compute_bsm_vanilla_delta(ttm=ttm, forward=forward, strike=strike, vol=vol, optiontype='C')
+
+# invert the price back to an implied vol (round-trips to `vol`)
+implied_vol = infer_bsm_implied_vol(forward=forward,
+                                    ttm=ttm,
+                                    strike=strike,
+                                    given_price=price,
+                                    discfactor=discfactor,
+                                    optiontype='C')
+
+print(f"price={price:.4f}  delta={delta:.4f}  implied_vol={implied_vol:.4f}")
 ```
 
 ### Vectorized Calculations
@@ -114,7 +116,7 @@ option_prices = compute_bsm_vanilla_price_vector(
     strike=strikes,
     ttm=0.25,
     vol=vols,
-    option_type='C'
+    optiontype='C'
 )
 
 print("Vectorized Option Prices:", option_prices)
@@ -129,40 +131,6 @@ VanillaOptionPricers leverages Numba's JIT compilation to achieve:
 - **Speed**: Orders of magnitude faster than pure Python implementations
 - **Memory Efficiency**: Optimized memory usage for large-scale calculations
 - **Numerical Stability**: Robust implementations with proper handling of edge cases
-
-## API Documentation
-
-### Core Functions
-
-#### `black_scholes_price(spot, strike, time_to_expiry, risk_free_rate, volatility, option_type)`
-
-Calculate Black-Scholes option price.
-
-**Parameters:**
-- `spot` (float/array): Current underlying price
-- `strike` (float/array): Strike price
-- `time_to_expiry` (float/array): Time to expiration in years
-- `risk_free_rate` (float/array): Risk-free interest rate
-- `volatility` (float/array): Volatility (annualized)
-- `option_type` (str): Option type ('C', 'P', 'IC', 'IP')
-
-**Returns:**
-- `float/array`: Option price(s)
-
-#### `implied_volatility(market_price, spot, strike, time_to_expiry, risk_free_rate, option_type)`
-
-Calculate implied volatility from market price.
-
-**Parameters:**
-- `market_price` (float/array): Observed market price
-- `spot` (float/array): Current underlying price
-- `strike` (float/array): Strike price
-- `time_to_expiry` (float/array): Time to expiration in years
-- `risk_free_rate` (float/array): Risk-free interest rate
-- `option_type` (str): Option type ('C', 'P', 'IC', 'IP')
-
-**Returns:**
-- `float/array`: Implied volatility(ies)
 
 ## Use Cases
 
@@ -205,7 +173,7 @@ pip install -e .
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
 ## Citation
 
