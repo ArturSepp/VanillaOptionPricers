@@ -4,6 +4,8 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-08-16
+
 ### Added
 - Added a thin, output-free Colab entry point that installs the latest public PyPI release and is
   mechanically checked against the authoritative offline quickstart.

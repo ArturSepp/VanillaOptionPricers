@@ -177,7 +177,8 @@ publish without the maintainer explicitly asking for a release.
 
 ## Known issues
 
-`pyproject.toml`, `CITATION.cff`, tag `v1.3.0`, and PyPI are aligned at version 1.3.0.
+`pyproject.toml` and `CITATION.cff` declare current release version 1.3.1. The Git tag and PyPI
+release must use the same version.
 The project advertises Python 3.13 but CI currently stops at 3.12. The installed package uses
 the standard `src/vanilla_option_pricers/` layout; repository-only examples live under root
 `examples/`.
