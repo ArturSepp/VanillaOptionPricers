@@ -19,6 +19,12 @@ Start with [installation and a first result](getting_started.md). The determinis
 prices a call, computes its delta, and recovers its input Black-Scholes-Merton volatility without
 network access or credentials.
 
+Continue with the task guide that matches your workflow:
+
+- [Price options and compute Greeks](pricing_and_greeks.md)
+- [Recover implied volatility](implied_volatility.md)
+- [Look up the complete package-root API](api.md)
+
 ## Scope
 
 The package covers:
@@ -43,7 +49,10 @@ normalisation.
 
 ```{toctree}
 :maxdepth: 2
-:caption: Getting started
+:caption: Documentation
 
 getting_started
+pricing_and_greeks
+implied_volatility
+api
 ```
