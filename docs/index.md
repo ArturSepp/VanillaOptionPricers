@@ -31,6 +31,7 @@ Use the convention and trust guides before adapting market data or measuring per
 - [Normalize inverse-option quotes](inverse_options.md)
 - [Choose array shapes and understand Numba behavior](array_shapes_and_numba.md)
 - [Interpret numerical accuracy and timing](numerical_accuracy_and_performance.md)
+- [Compare package scope and choose a tool](package_comparison.md)
 
 ## Scope
 
@@ -66,4 +67,5 @@ bachelier_convention
 inverse_options
 array_shapes_and_numba
 numerical_accuracy_and_performance
+package_comparison
 ```
