@@ -82,77 +82,19 @@ VanillaOptionPricers supports the following option types (passed as string param
 
 ## Quick Start
 
-### Basic Option Pricing
+Use the authoritative, deterministic
+[pricing and IV script](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/examples/getting_started/pricing_and_iv.py).
+It prices one aligned BSM
+slice, recovers the input implied volatilities, checks put-call parity, demonstrates the relative
+Bachelier convention, and reports cold and warm execution separately.
 
-Pricers consume a caller-supplied `forward` and `discfactor`; the package does not construct them
-from spots, rates, dividends, or curves. Time to maturity is expressed in years and `vol` is an
-annualised log-normal volatility in the Black-Scholes-Merton functions.
-
-```python
-from vanilla_option_pricers import (
-    compute_bsm_vanilla_price,
-    compute_bsm_vanilla_delta,
-    infer_bsm_implied_vol,
-)
-
-forward = 101.25         # supplied by the caller
-discfactor = 0.99        # supplied by the caller
-strike = 105.0
-ttm = 0.25             # time to maturity, in years
-vol = 0.20             # annualised lognormal vol
-
-price = compute_bsm_vanilla_price(
-    forward=forward,
-    strike=strike,
-    ttm=ttm,
-    vol=vol,
-    optiontype='C',
-    discfactor=discfactor,
-)
-delta = compute_bsm_vanilla_delta(
-    ttm=ttm,
-    forward=forward,
-    strike=strike,
-    vol=vol,
-    optiontype='C',
-    discfactor=discfactor,
-)
-
-# invert the price back to an implied vol (round-trips to `vol`)
-implied_vol = infer_bsm_implied_vol(
-    forward=forward,
-    ttm=ttm,
-    strike=strike,
-    given_price=price,
-    discfactor=discfactor,
-    optiontype='C',
-)
-
-print(f"price={price:.4f}  delta={delta:.4f}  implied_vol={implied_vol:.4f}")
+```bash
+python examples/getting_started/pricing_and_iv.py
 ```
 
-### Vectorised calculations
-
-```python
-import numpy as np
-from vanilla_option_pricers import compute_bsm_vanilla_price_vector
-
-# Vectorised pricing for multiple strikes
-forwards = np.array([95, 100, 105, 110])
-strikes = np.array([100, 100, 100, 100])
-vols = np.array([0.15, 0.20, 0.25, 0.30])
-
-option_prices = compute_bsm_vanilla_price_vector(
-    forward=forwards,
-    strike=strikes,
-    ttm=0.25,
-    vol=vols,
-    optiontype='C'
-)
-
-print("Vectorised option prices:", option_prices)
-```
-
+The [rendered quickstart](https://vanillaoptionpricers.readthedocs.io/en/stable/getting_started.html)
+includes that source directly and explains its inputs and output. The script requires no market
+data, network access, credentials, or optional dependencies.
 
 ## Execution model
 

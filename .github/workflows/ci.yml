@@ -60,3 +60,50 @@ jobs:
 
     - name: Run tests
       run: pytest src/vanilla_option_pricers/tests/ -v
+
+  first-success-wheel:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install build tools and runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install build "numpy>=2.0" "numba>=0.60.0"
+
+    - name: Build wheel and source distribution
+      run: python -m build
+
+    - name: Inspect and install the wheel
+      run: >
+        python -c "from pathlib import Path; import subprocess, sys, zipfile;
+        wheel = next(Path('dist').glob('*.whl'));
+        names = zipfile.ZipFile(wheel).namelist();
+        assert not any(name.startswith('examples/') for name in names), names;
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-deps', str(wheel)]);
+        print(wheel)"
+
+    - name: Run first success outside the checkout
+      run: >
+        python -c "import os, runpy, shutil, tempfile;
+        from pathlib import Path;
+        repo = Path.cwd().resolve();
+        source = repo / 'examples' / 'getting_started' / 'pricing_and_iv.py';
+        work = Path(tempfile.mkdtemp(prefix='vanilla-option-pricers-wheel-'));
+        target = Path(shutil.copy2(source, work / source.name));
+        os.chdir(work);
+        runpy.run_path(str(target), run_name='__main__');
+        import vanilla_option_pricers as package;
+        package_path = Path(package.__file__).resolve();
+        assert repo not in package_path.parents, (repo, package_path);
+        print(f'wheel_import={package_path}')"

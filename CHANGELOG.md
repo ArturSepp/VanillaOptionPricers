@@ -4,6 +4,11 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+### Added
+- Added one authoritative offline pricing and implied-volatility quickstart under root
+  `examples/`, included directly in the hosted documentation and exercised from a clean wheel on
+  Linux, Windows, and macOS CI.
+
 ### Changed
 - Aligned the package metadata, README, citation title, and software BibTeX entry on one scope:
   Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility

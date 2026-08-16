@@ -17,61 +17,41 @@ python -m pip install -e ".[docs]"
 The package's runtime dependencies remain NumPy and Numba. Sphinx, MyST Parser, and Furo belong
 only to the optional `docs` extra.
 
-## Price, compute delta, and recover implied volatility
+## Run the authoritative offline example
 
-This example uses the public package-root API. The caller supplies the forward and discount
-factor; the package does not construct them from a spot, rate, dividend, or curve.
+The repository's
+[pricing and IV script](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/examples/getting_started/pricing_and_iv.py)
+is the single source for first success. It uses only the installed package, NumPy, Numba, and
+deterministic generated inputs; it requires no network, credentials, pandas, or SciPy and creates
+no files.
 
-```python
-from vanilla_option_pricers import (
-    compute_bsm_vanilla_delta,
-    compute_bsm_vanilla_price,
-    infer_bsm_implied_vol,
-)
+From a source checkout with the package installed, run:
 
-forward = 101.25
-discfactor = 0.99
-strike = 105.0
-ttm = 0.25
-vol = 0.20
-
-price = compute_bsm_vanilla_price(
-    forward=forward,
-    strike=strike,
-    ttm=ttm,
-    vol=vol,
-    optiontype="C",
-    discfactor=discfactor,
-)
-delta = compute_bsm_vanilla_delta(
-    ttm=ttm,
-    forward=forward,
-    strike=strike,
-    vol=vol,
-    optiontype="C",
-    discfactor=discfactor,
-)
-implied_vol = infer_bsm_implied_vol(
-    forward=forward,
-    ttm=ttm,
-    strike=strike,
-    given_price=price,
-    discfactor=discfactor,
-    optiontype="C",
-)
-
-print(f"price={price:.4f}  delta={delta:.4f}  implied_vol={implied_vol:.4f}")
+```console
+python examples/getting_started/pricing_and_iv.py
 ```
 
-Expected output:
+The wheel intentionally excludes repository examples. After installing from PyPI, download or
+copy the linked script and run it from any directory.
 
-```text
-price=2.4811  delta=0.3731  implied_vol=0.2000
+```{literalinclude} ../examples/getting_started/pricing_and_iv.py
+:language: python
+:linenos:
 ```
 
-The implied-volatility result round-trips to the input annualised lognormal volatility. Time to
-maturity is in years. The exact same example is checked in the repository
-[README quick start](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/README.md#quick-start).
+The script prices one aligned BSM slice, recovers all four input volatilities, and checks the
+same-strike call/put pair against forward put-call parity. It also prices and inverts one
+Bachelier call with the package's relative normal-volatility convention:
+`absolute_normal_vol = forward * relative_vol`.
+
+Successful output reports package version and import path; input/output shapes; option codes and
+prices; maximum IV and parity errors; one cold first-call duration; the mean of ten warm repeats;
+and the Bachelier conversion. Timing values are machine-dependent and are not a benchmark. The
+verified numerical errors are required to remain below the explicit thresholds in the script.
+
+Start adaptation with the final `change_first` line: `forward`, `discfactor`, `ttm`, `strikes`,
+`option_types`, and `model_convention`. Preserve the stated units and alignment contracts when
+substituting market inputs.
 
 ## Next steps and boundaries
 
@@ -79,7 +59,8 @@ Use the package-root functions for stable user examples. Array helpers have dist
 aligned-array, grid, and per-expiry contracts; arbitrary broadcasting is not promised. The first
 call to a Numba-compiled signature includes compilation time.
 
-Detailed task guides and a complete API inventory follow in later documentation stages. Until
-then, use the [source repository](https://github.com/ArturSepp/VanillaOptionPricers) and
-[issue tracker](https://github.com/ArturSepp/VanillaOptionPricers/issues) for implementation and
-support details.
+Continue with [pricing and Greeks](pricing_and_greeks.md),
+[implied volatility](implied_volatility.md),
+[Bachelier units](bachelier_convention.md), and
+[array/Numba behavior](array_shapes_and_numba.md). Use the
+[issue tracker](https://github.com/ArturSepp/VanillaOptionPricers/issues) for support.
