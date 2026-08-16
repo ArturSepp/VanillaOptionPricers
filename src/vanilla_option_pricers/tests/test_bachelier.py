@@ -1,9 +1,9 @@
 """
 numerical tests for the Bachelier (normal) model in vanilla_option_pricers.bachelier.
 
-Mirrors tests/test_black_scholes.py: put-call parity, finite-difference checks of the
+Mirrors test_black_scholes.py: put-call parity, finite-difference checks of the
 greeks, and an implied-vol round-trip. numpy and pytest only (no scipy). Run with
-`pytest vanilla_option_pricers/tests/ -v`.
+`pytest src/vanilla_option_pricers/tests/ -v`.
 """
 
 # packages
@@ -12,10 +12,10 @@ import pytest
 
 # vanilla_option_pricers
 from vanilla_option_pricers.bachelier import (
-    compute_normal_price,
     compute_normal_delta,
-    compute_normal_slice_vegas,
     compute_normal_delta_to_strike,
+    compute_normal_price,
+    compute_normal_slice_vegas,
     infer_normal_implied_vol,
 )
 
@@ -94,7 +94,9 @@ def test_delta_to_strike_roundtrip():
     """compute_normal_delta_to_strike inverts compute_normal_delta (ncdf_inv-limited)."""
     forward, ttm, vol = 100.0, 1.0, 0.2
     for target_delta in (0.25, 0.5, 0.75, -0.25, -0.5):
-        strike = compute_normal_delta_to_strike(ttm=ttm, forward=forward, delta=target_delta, vol=vol)
+        strike = compute_normal_delta_to_strike(
+            ttm=ttm, forward=forward, delta=target_delta, vol=vol
+        )
         optiontype = 'C' if target_delta > 0.0 else 'P'
         recovered = compute_normal_delta(ttm, forward, strike, vol, optiontype, 1.0)
         assert recovered == pytest.approx(target_delta, abs=1e-3)

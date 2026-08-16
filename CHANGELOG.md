@@ -2,6 +2,16 @@
 
 Entries start at 1.2.4. For earlier releases see the git log.
 
+## [Unreleased]
+
+### Changed
+- Aligned the package metadata, README, citation title, and software BibTeX entry on one scope:
+  Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility
+  fits over NumPy arrays for quantitative research pipelines.
+- Clarified that the public pricing API consumes caller-supplied forwards and discount factors,
+  and bounded the `IC`/`IP`, array execution, and performance descriptions to behavior supported
+  by the current API.
+
 ## [1.3.0] - 2026-07-22
 
 ### Changed

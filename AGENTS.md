@@ -6,9 +6,10 @@ Guidance for AI coding agents working in the **VanillaOptionPricers** repository
 
 `vanilla-option-pricers` provides fast, vectorised pricers and implied volatility
 fitters for vanilla options under the Black-Scholes-Merton and Bachelier (normal)
-models, including coin-denominated inverse options as traded on cryptocurrency
-derivatives exchanges. Everything is `numba`-compiled over numpy arrays, with exactly
-two runtime dependencies: numpy and numba.
+models. It also exposes `IC`/`IP` branches used by coin-denominated inverse-option
+workflows; callers own the required measure and payoff normalisation. Scalar kernels and
+slice/grid/chain helpers are `numba`-compiled, while five convenience wrappers use
+`numpy.vectorize`. The only runtime dependencies are numpy and numba.
 
 The design goal is minimalism and speed inside calibration loops and surface fitters —
 it is deliberately not a derivatives framework. Distribution name
@@ -42,32 +43,46 @@ sibling package, say so rather than reimplementing it here.
 ## Repository layout
 
 ```
-vanilla_option_pricers/
-  black_scholes.py   Black-Scholes-Merton pricers and implied volatility fitters
-  bachelier.py       Bachelier normal pricers and implied volatility fitters
-  utils.py           shared numerical helpers
+src/vanilla_option_pricers/
+  __init__.py              package-root public exports
+  black_scholes.py         Black-Scholes-Merton pricers and implied volatility fitters
+  bachelier.py             Bachelier normal pricers and implied volatility fitters
+  utils.py                 shared numerical helpers
   tests/
-    bsm_speed.py     performance check, run directly by CI
+    test_black_scholes.py  parity, reference-value, and finite-difference tests
+    test_bachelier.py      parity, finite-difference, and implied-volatility tests
+examples/
+  README.md                example scope and execution guidance
+  performance/
+    bsm_speed.py           manual timing diagnostic; not a CI correctness gate
 ```
 
 ## Commands
 
 ```bash
 pip install -e ".[dev]"
-python vanilla_option_pricers/tests/bsm_speed.py   # performance check, as CI runs it
-ruff check vanilla_option_pricers/                 # lint
+pytest src/vanilla_option_pricers/tests/ -v          # correctness checks, as CI runs them
+python examples/performance/bsm_speed.py             # optional local timing diagnostic
+ruff check src/vanilla_option_pricers/ examples/     # lint
 ```
 
-There is no pytest configuration in this repository yet and no `test_*.py` modules;
-CI runs the speed script directly. Supported Python is >= 3.9; CI runs 3.10 - 3.12.
+Pytest's configured `testpaths` points at `src/vanilla_option_pricers/tests/`. Supported Python
+is >= 3.10. CI runs the correctness suite on Python 3.10 - 3.12 under Ubuntu; the Python 3.13
+classifier is not yet covered by CI. Root `examples/` is repository-only and excluded from the
+wheel.
 
 ## Conventions
 
 - Line length 100 (`ruff`, rules `E`, `F`, `W`, `I`).
-- Every pricing function is `numba`-compiled and takes numpy arrays in and returns
-  numpy arrays out. There is no object model, no calendar handling, and no pandas.
-- Option type selection is by enum, including the inverse-option variants.
-- Scalar inputs are handled by broadcasting, not by a separate scalar code path.
+- `pyproject.toml` contains narrow per-file waivers for pre-existing lint debt in the unchanged
+  numerical modules and package re-exports. Do not expand those waivers for new code.
+- Scalar pricing functions are Numba dispatchers. Explicit slice, grid, and chain helpers use
+  compiled loops over aligned arrays; five `*_vector` conveniences use `numpy.vectorize`.
+- Option type selection is by the string codes `C`, `P`, `IC`, and `IP`; there is no exported
+  option-type enum.
+- Do not promise arbitrary broadcasting. Scalar functions, `numpy.vectorize` wrappers, aligned
+  slice/grid arrays, and per-expiry chain containers are distinct public paths.
+- There is no object model, calendar handling, or pandas integration.
 - New functionality should come with a numerical check against a reference value or
   against put-call parity.
 
@@ -81,6 +96,13 @@ CI runs the speed script directly. Supported Python is >= 3.9; CI runs 3.10 - 3.
 - Do not introduce Python-level loops over strikes or expiries in place of vectorised
   operations.
 - Do not wrap the functions in classes; the API is deliberately function-based.
+
+## Repository-specific agent artefacts
+
+By maintainer direction, all VanillaOptionPricers roadmaps, execution plans, audits, and
+reports live in the ignored `agents/` directory. This repository-specific rule overrides the
+generic roadmap location inside the generated shared-agent block below; do not edit that
+generated block directly.
 
 <!-- ===== SHARED AGENT CORE (standalone variant) — begin =====
      Generated from SHARED_AGENT_CORE.md in the maintainer's project knowledge. Do not hand-edit
@@ -155,6 +177,7 @@ publish without the maintainer explicitly asking for a release.
 
 ## Known issues
 
-`pyproject.toml` is at version 1.2.3 while PyPI serves 1.2.2, so the repository is one
-unpublished version ahead. Adding a real pytest suite (currently only `bsm_speed.py`
-exists, run directly by CI) would be a welcome contribution if the maintainer asks.
+`pyproject.toml`, `CITATION.cff`, tag `v1.3.0`, and PyPI are aligned at version 1.3.0.
+The project advertises Python 3.13 but CI currently stops at 3.12. The installed package uses
+the standard `src/vanilla_option_pricers/` layout; repository-only examples live under root
+`examples/`.

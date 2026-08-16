@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vanilla-option-pricers"
 version = "1.3.0"
-description = "Fast and vectorised pricer and implied volatility fitters for Black-Scholes and Bachelier models"
+description = "vanilla-option-pricers - Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays for quantitative research pipelines"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -40,6 +40,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx>=8.0,<10.0",
+    "myst-parser>=4.0,<6.0",
+    "furo>=2024.8.6",
+]
 dev = [
     "pytest>=7.0.0",
     "ruff>=0.4",
@@ -47,15 +52,33 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/ArturSepp/VanillaOptionPricers"
+Documentation = "https://vanillaoptionpricers.readthedocs.io/en/stable/"
 Repository = "https://github.com/ArturSepp/VanillaOptionPricers.git"
 Issues = "https://github.com/ArturSepp/VanillaOptionPricers/issues"
+Changelog = "https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["vanilla_option_pricers*"]
 exclude = ["tests*", "docs*"]
 
+[tool.pytest.ini_options]
+testpaths = ["src/vanilla_option_pricers/tests"]
+
 [tool.ruff]
 line-length = 100
+src = ["src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
+
+# Preserve byte-for-byte numerical modules during V0b. These narrow waivers describe
+# pre-existing lint debt and must not be expanded for new code.
+[tool.ruff.lint.per-file-ignores]
+"src/vanilla_option_pricers/__init__.py" = ["F401", "I001"]
+"src/vanilla_option_pricers/bachelier.py" = ["E501", "F541", "I001"]
+"src/vanilla_option_pricers/black_scholes.py" = ["E501", "F541", "I001"]
+"src/vanilla_option_pricers/utils.py" = ["E501", "I001"]

@@ -1,9 +1,10 @@
 
 import timeit
+from enum import Enum
+
 import numpy as np
 
 import vanilla_option_pricers.black_scholes as bsm
-from enum import Enum
 
 
 def test_vector_vs_loop(size: int = 1000):

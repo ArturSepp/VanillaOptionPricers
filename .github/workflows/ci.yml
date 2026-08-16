@@ -33,6 +33,8 @@ jobs:
     - name: Verify imports
       run: |
         python -c "
+        from pathlib import Path
+        import vanilla_option_pricers as package
         from vanilla_option_pricers import (
             compute_bsm_vanilla_price,
             compute_bsm_vanilla_slice_prices,
@@ -49,8 +51,12 @@ jobs:
             infer_normal_implied_vol,
             ncdf, npdf,
         )
+        package_path = Path(package.__file__).resolve()
+        assert package_path.parent.name == 'vanilla_option_pricers'
+        assert package_path.parent.parent.name == 'src'
+        print(package_path)
         print('All imports OK')
         "
 
     - name: Run tests
-      run: pytest vanilla_option_pricers/tests/ -v
+      run: pytest src/vanilla_option_pricers/tests/ -v

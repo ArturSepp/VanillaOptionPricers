@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
-title: "VanillaOptionPricers: Fast and vectorized option pricers and implied volatility fitters for Black-Scholes-Merton and Bachelier models"
+title: "VanillaOptionPricers: Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays"
 authors:
   - family-names: Sepp
     given-names: Artur
