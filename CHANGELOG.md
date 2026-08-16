@@ -5,6 +5,8 @@ Entries start at 1.2.4. For earlier releases see the git log.
 ## [Unreleased]
 
 ### Added
+- Added a thin, output-free Colab entry point that installs the latest public PyPI release and is
+  mechanically checked against the authoritative offline quickstart.
 - Added one authoritative offline pricing and implied-volatility quickstart under root
   `examples/`, included directly in the hosted documentation and exercised from a clean wheel on
   Linux, Windows, and macOS CI.

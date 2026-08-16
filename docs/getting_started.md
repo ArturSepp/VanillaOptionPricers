@@ -19,6 +19,8 @@ only to the optional `docs` extra.
 
 ## Run the authoritative offline example
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ArturSepp/VanillaOptionPricers/blob/main/notebooks/offline_quickstart_colab.ipynb)
+
 The repository's
 [pricing and IV script](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/examples/getting_started/pricing_and_iv.py)
 is the single source for first success. It uses only the installed package, NumPy, Numba, and
@@ -33,6 +35,10 @@ python examples/getting_started/pricing_and_iv.py
 
 The wheel intentionally excludes repository examples. After installing from PyPI, download or
 copy the linked script and run it from any directory.
+
+For a zero-local-setup trial, the Colab notebook installs the latest released distribution from
+the official PyPI index, prints its distribution version and import path, and runs the exact same
+workflow below. The committed notebook contains no execution output.
 
 ```{literalinclude} ../examples/getting_started/pricing_and_iv.py
 :language: python

@@ -82,6 +82,8 @@ VanillaOptionPricers supports the following option types (passed as string param
 
 ## Quick Start
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ArturSepp/VanillaOptionPricers/blob/main/notebooks/offline_quickstart_colab.ipynb)
+
 Use the authoritative, deterministic
 [pricing and IV script](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/examples/getting_started/pricing_and_iv.py).
 It prices one aligned BSM
@@ -95,6 +97,9 @@ python examples/getting_started/pricing_and_iv.py
 The [rendered quickstart](https://vanillaoptionpricers.readthedocs.io/en/stable/getting_started.html)
 includes that source directly and explains its inputs and output. The script requires no market
 data, network access, credentials, or optional dependencies.
+
+The Colab entry point installs the latest release from public PyPI, reports its exact version and
+import path, and runs the same mechanically checked workflow with no saved notebook outputs.
 
 ## Execution model
 
