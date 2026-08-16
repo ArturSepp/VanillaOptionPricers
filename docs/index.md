@@ -25,6 +25,13 @@ Continue with the task guide that matches your workflow:
 - [Recover implied volatility](implied_volatility.md)
 - [Look up the complete package-root API](api.md)
 
+Use the convention and trust guides before adapting market data or measuring performance:
+
+- [Convert Bachelier normal-volatility units](bachelier_convention.md)
+- [Normalize inverse-option quotes](inverse_options.md)
+- [Choose array shapes and understand Numba behavior](array_shapes_and_numba.md)
+- [Interpret numerical accuracy and timing](numerical_accuracy_and_performance.md)
+
 ## Scope
 
 The package covers:
@@ -55,4 +62,8 @@ getting_started
 pricing_and_greeks
 implied_volatility
 api
+bachelier_convention
+inverse_options
+array_shapes_and_numba
+numerical_accuracy_and_performance
 ```
