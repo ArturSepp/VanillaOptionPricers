@@ -9,13 +9,16 @@ analytic theta assumes.
 import math
 
 import numpy as np
+from numba.typed import List
 
 from vanilla_option_pricers.black_scholes import (
     compute_bsm_vanilla_delta,
     compute_bsm_vanilla_gamma,
     compute_bsm_vanilla_price,
+    compute_bsm_vanilla_slice_prices,
     compute_bsm_vanilla_theta,
     compute_bsm_vanilla_vega,
+    infer_bsm_ivols_from_model_chain_prices,
 )
 
 # (spot, strike, ttm, vol, rate)
@@ -87,3 +90,37 @@ def test_delta_vega_gamma_match_finite_difference():
             up = compute_bsm_vanilla_price(forward + h, strike, ttm, vol, optiontype)
             down = compute_bsm_vanilla_price(forward - h, strike, ttm, vol, optiontype)
             assert abs(delta - (up - down) / (2.0 * h)) < 1e-4
+
+
+def test_chain_iv_solver_accepts_fixed_width_optiontype_arrays():
+    """SVM option chains pass NumPy ``<U1`` option codes through Numba typed lists."""
+    ttm = 0.25
+    forward = 1.0
+    vol = 0.3
+    strikes = np.array([0.8, 0.9, 1.0, 1.1, 1.2])
+    optiontypes = np.where(strikes >= forward, "C", "P")
+    prices = compute_bsm_vanilla_slice_prices(
+        ttm=ttm,
+        forward=forward,
+        strikes=strikes,
+        vols=np.full_like(strikes, vol),
+        optiontypes=optiontypes,
+    )
+
+    strikes_ttms = List()
+    strikes_ttms.append(strikes)
+    optiontypes_ttms = List()
+    optiontypes_ttms.append(optiontypes)
+    prices_ttms = List()
+    prices_ttms.append(prices)
+
+    inferred = infer_bsm_ivols_from_model_chain_prices(
+        ttms=np.array([ttm]),
+        forwards=np.array([forward]),
+        discfactors=np.array([1.0]),
+        strikes_ttms=strikes_ttms,
+        optiontypes_ttms=optiontypes_ttms,
+        model_prices_ttms=prices_ttms,
+    )
+
+    np.testing.assert_allclose(inferred[0], vol, rtol=0.0, atol=2.0e-7)

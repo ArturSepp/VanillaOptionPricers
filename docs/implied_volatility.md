@@ -9,8 +9,8 @@ myst:
 
 Use implied-volatility functions when an observed or model price, forward, discount factor,
 maturity, strike, and option type are already expressed in one consistent convention. BSM returns
-annualised lognormal volatility. Bachelier returns this package's annualised, relative normal
-volatility, not an absolute price-unit normal volatility.
+annualised lognormal volatility. Bachelier returns annualised absolute normal volatility in the
+same units as the forward and strike.
 
 ## Scalar solver contract
 
@@ -21,8 +21,8 @@ price or relative-error tolerance.
 | Argument | BSM default | Normal default | Meaning |
 |---|---:|---:|---|
 | `tol` | `1e-8` | `1e-8` | Absolute volatility-step convergence tolerance. |
-| `vol_lower` | `0.01` | `0.01` | Lower bracket endpoint. |
-| `vol_upper` | `5.0` | `10.0` | Upper bracket endpoint. |
+| `vol_lower` | `0.01` | `1e-8` | Lower bracket endpoint. |
+| `vol_upper` | `5.0` | `1e4` | Upper bracket endpoint. |
 | `max_iters` | `100` | `100` | Maximum safeguarded iterations. |
 | `is_bounds_to_nan` | `True` | `True` | Return `nan` for an unbracketed/non-positive target; when `False`, return the violated bracket bound. |
 
@@ -54,6 +54,7 @@ from vanilla_option_pricers import (
 )
 
 forward, discfactor, ttm, strike, vol = 101.25, 0.99, 0.25, 105.0, 0.20
+normal_vol = 20.0
 bsm_price = compute_bsm_vanilla_price(
     forward, strike, ttm, vol, "C", discfactor
 )
@@ -61,7 +62,7 @@ bsm_iv = infer_bsm_implied_vol(
     forward, ttm, strike, bsm_price, discfactor, "C"
 )
 normal_price = compute_normal_price(
-    forward, strike, ttm, vol, discfactor, "C"
+    forward, strike, ttm, normal_vol, discfactor, "C"
 )
 normal_iv = infer_normal_implied_vol(
     forward, ttm, strike, normal_price, discfactor, "C"
@@ -116,7 +117,7 @@ Expected output:
 
 ```text
 bsm_price=2.481053 bsm_iv=0.20000000
-normal_price=2.413828 normal_iv=0.20000000
+normal_price=2.367771 normal_iv=20.00000000
 slice_iv=[0.18 0.2  0.22]
 chain_iv=[[0.18, 0.22], [0.19, 0.24]]
 ```

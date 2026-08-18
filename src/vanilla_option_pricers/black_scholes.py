@@ -801,21 +801,24 @@ def infer_bsm_implied_vol(forward: float,
     if np.isnan(given_price) or given_price <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
 
-    # invert the OTM counterpart for vanillas via put-call parity for conditioning
-    solve_type = optiontype
+    # Invert the OTM counterpart for vanillas via put-call parity for conditioning. Keep
+    # the caller's fixed-width NumPy string type unchanged: assigning a Python string
+    # literal to it cannot be lowered by Numba when this scalar solver is called from a
+    # compiled chain loop.
     target = given_price
+    price_offset = 0.0
     if optiontype == 'C' and strike < forward:
-        target = given_price - discfactor * (forward - strike)
-        solve_type = 'P'
+        price_offset = discfactor * (forward - strike)
+        target = given_price - price_offset
     elif optiontype == 'P' and strike > forward:
-        target = given_price - discfactor * (strike - forward)
-        solve_type = 'C'
+        price_offset = discfactor * (strike - forward)
+        target = given_price - price_offset
     if target <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
 
     sqrt_ttm = np.sqrt(ttm)
-    f_lo = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=solve_type) - target
-    f_hi = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=solve_type) - target
+    f_lo = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+    f_hi = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=optiontype) - price_offset - target
     if f_lo * f_hi > 0.0:  # price not bracketed by [vol_lower, vol_upper]
         if is_bounds_to_nan:
             return np.nan
@@ -829,7 +832,7 @@ def infer_bsm_implied_vol(forward: float,
     rts = 0.5 * (vol_lower + vol_upper)
     dx_old = np.abs(vol_upper - vol_lower)
     dx = dx_old
-    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=solve_type) - target
+    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
     d1 = np.log(forward / strike) / (rts * sqrt_ttm) + 0.5 * rts * sqrt_ttm
     df = discfactor * forward * npdf(d1) * sqrt_ttm
     for _ in range(max_iters):
@@ -848,7 +851,7 @@ def infer_bsm_implied_vol(forward: float,
                 break
         if np.abs(dx) < tol:
             break
-        f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=solve_type) - target
+        f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
         d1 = np.log(forward / strike) / (rts * sqrt_ttm) + 0.5 * rts * sqrt_ttm
         df = discfactor * forward * npdf(d1) * sqrt_ttm
         if f < 0.0:

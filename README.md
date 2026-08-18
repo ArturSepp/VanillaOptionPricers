@@ -22,7 +22,7 @@ containers. The runtime dependency surface is limited to NumPy and Numba.
 
 ## What makes it different
 
-- **Log-normal and relative-normal models side by side.** Black-Scholes-Merton and Bachelier
+- **Log-normal and absolute-normal models side by side.** Black-Scholes-Merton and Bachelier
   functions share a forward-and-discount-factor interface. The detailed Bachelier volatility
   convention is part of the package contract and will be documented separately.
 - **Implied volatility as a first-class fitter.** Scalar, slice, and chain helpers recover model

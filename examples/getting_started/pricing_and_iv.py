@@ -53,13 +53,12 @@ max_iv_error = float(np.max(np.abs(implied_vols - lognormal_vols)))
 parity_error = float(prices[2] - prices[1] - discfactor * (forward - strikes[1]))
 
 absolute_normal_vol = 5.0
-relative_normal_vol = absolute_normal_vol / forward
 normal_strike = 102.0
 normal_price = vop.compute_normal_price(
     forward,
     normal_strike,
     ttm,
-    relative_normal_vol,
+    absolute_normal_vol,
     discfactor,
     "C",
 )
@@ -76,7 +75,7 @@ if max_iv_error > 1e-7:
     raise RuntimeError(f"BSM implied-volatility round trip failed: {max_iv_error}")
 if abs(parity_error) > 1e-10:
     raise RuntimeError(f"BSM put-call parity failed: {parity_error}")
-if abs(normal_implied_vol - relative_normal_vol) > 1e-7:
+if abs(normal_implied_vol - absolute_normal_vol) > 1e-7:
     raise RuntimeError("Bachelier implied-volatility round trip failed")
 if not (
     np.array_equal(prices, warm_prices)
@@ -100,13 +99,12 @@ print(
     f"warm_repetitions={warm_repetitions}"
 )
 print(
-    f"bachelier_relative_vol={relative_normal_vol:.6f} "
-    f"absolute_normal_vol={absolute_normal_vol:.6f} "
+    f"bachelier_absolute_vol={absolute_normal_vol:.6f} "
     f"price={normal_price:.8f} iv_error="
-    f"{normal_implied_vol - relative_normal_vol:.3e}"
+    f"{normal_implied_vol - absolute_normal_vol:.3e}"
 )
 print("bsm_convention=forward, discount factor, years, annualised lognormal volatility")
-print("bachelier_convention=relative vol; absolute_normal_vol = forward * relative_vol")
+print("bachelier_convention=annualised absolute normal volatility in forward units")
 print(
     "change_first=forward, discfactor, ttm, strikes, option_types, model_convention"
 )

@@ -16,17 +16,17 @@ rates, dividends, discount curves, calendars, or settlement conventions.
 
 | Input | Type and units | Contract |
 |---|---|---|
-| `forward` | positive `float`, price units | Caller-supplied forward (F). If appropriate for the market, construct (F=S\exp((r-q)T)) outside the package. |
-| `strike` | positive `float`, same units as `forward` | Strike (K). |
+| `forward` | `float`, price units | Caller-supplied forward (F). BSM requires a positive forward; Bachelier also supports zero and negative forwards. |
+| `strike` | `float`, same units as `forward` | Strike (K). BSM requires a positive strike. |
 | `ttm` | `float`, years | Time to maturity (T). Documented examples use positive values. |
 | `vol` for BSM | `float`, annualised decimal | Lognormal volatility; `0.20` means 20%. |
-| `vol` for Bachelier | positive `float`, annualised decimal | Relative, dimensionless normal volatility; the period standard deviation is (F\,vol\sqrt{T}). The detailed unit contract is deferred to the Bachelier convention guide. |
+| `vol` for Bachelier | positive `float`, annualised price/rate units | Absolute normal volatility; the period standard deviation is (vol\sqrt{T}). |
 | `discfactor` | `float`, default `1.0` | Discount factor (D), conventionally (\exp(-rT)). |
 | `optiontype` | `str` | `"C"` or `"P"` for the documented vanilla workflows. `"IC"` and `"IP"` select the corresponding internal payoff branch, but their quote and numeraire conversion is caller-owned and documented separately in V4b. |
 | `discount_rate` | `float`, default `0.0` | Continuously compounded (r), used only by BSM theta's rate term. |
 
 Black-Scholes-Merton uses (D(FN(d_1)-KN(d_2))) for a call and the corresponding put expression.
-Bachelier uses a relative normal volatility in this package. Both models satisfy
+Bachelier uses annualised absolute normal volatility. Both models satisfy
 (C-P=D(F-K)) for consistent inputs.
 
 ## First pricing and Greek result
@@ -63,7 +63,7 @@ gamma_f = compute_bsm_vanilla_gamma(ttm, forward, strike, vol)
 theta = compute_bsm_vanilla_theta(
     ttm, forward, strike, vol, "C", discfactor, rate
 )
-normal_call = compute_normal_price(forward, strike, ttm, vol, discfactor, "C")
+normal_call = compute_normal_price(forward, strike, ttm, 20.0, discfactor, "C")
 
 strikes = np.array([95.0, 100.0, 105.0])
 vols = np.array([0.18, 0.20, 0.22])
@@ -85,7 +85,7 @@ Expected output:
 forward=102.0201 discount=0.980199
 call=4.3770 put=7.2979 delta_F=0.438295
 vega=27.9616 gamma_F=0.02740790 theta=-7.2058
-normal_call=4.3014
+normal_call=4.1921
 slice=[2.2069 6.6271 4.9371]
 ```
 
@@ -119,8 +119,8 @@ slice, grid, or chain helper that matches the data layout.
 - Unsupported option codes raise `NotImplementedError` in price/theta/digital functions; normal
   delta returns `nan` for an unsupported code. Validate codes before a bulk call.
 - BSM price and Greeks switch to their intrinsic/zero-diffusion branches when `ttm <= 0`,
-  `vol <= 0`, or BSM `vol` is `nan`. The normal functions expect positive forward, maturity, and
-  relative volatility in documented use and do not provide the same explicit intrinsic guard.
+  `vol <= 0`, or BSM `vol` is `nan`. The normal functions support non-positive forwards but
+  expect positive maturity and absolute volatility and do not provide the same intrinsic guard.
 - Slice and chain functions assume aligned inputs and do not perform a separate shape-validation
   pass. A short input can truncate a `zip`; an incompatible dtype can fail during Numba typing.
 - The first call for a new Numba signature includes compilation time.

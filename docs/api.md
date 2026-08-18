@@ -65,9 +65,9 @@ For units, shapes, interpretation, and failure behavior, start with
 
 ## Bachelier pricing and Greeks
 
-- `compute_normal_price(forward: float, strike: float, ttm: float, vol: float, discfactor: float = 1.0, optiontype: str = 'C') -> float` — relative-normal vanilla price.
+- `compute_normal_price(forward: float, strike: float, ttm: float, vol: float, discfactor: float = 1.0, optiontype: str = 'C') -> float` — absolute-normal vanilla price.
 - `compute_normal_delta(ttm: float, forward: float, strike: float, vol: float, optiontype: str, discfactor: float = 1.0) -> float` — discounted forward delta.
-- `compute_normal_delta_from_lognormal_vol(ttm: float, forward: float, strike: float, given_price: float, optiontype: str, discfactor: float = 1.0) -> float` — normal delta after inverting the supplied price to relative normal vol; despite the historical name, `given_price` is the input.
+- `compute_normal_delta_from_lognormal_vol(ttm: float, forward: float, strike: float, given_price: float, optiontype: str, discfactor: float = 1.0) -> float` — normal delta after inverting the supplied price to absolute normal vol; despite the historical name, `given_price` is the input.
 - `compute_normal_delta_to_strike(ttm: float, forward: float, delta: float, vol: float) -> float | np.ndarray` — strike from target normal delta.
 - `compute_normal_slice_prices(ttm: float, forward: float, strikes: np.ndarray, vols: np.ndarray, optiontypes: np.ndarray, discfactor: float = 1.0) -> np.ndarray` — aligned one-expiry prices.
 - `compute_normal_slice_deltas(ttm: float | np.ndarray, forward: float | np.ndarray, strikes: float | np.ndarray, vols: float | np.ndarray, optiontypes: np.ndarray, discfactor: float = 1.0) -> float | np.ndarray` — aligned normal deltas.
@@ -77,7 +77,7 @@ For units, shapes, interpretation, and failure behavior, start with
 
 ## Bachelier implied volatility
 
-- `infer_normal_implied_vol(forward: float, ttm: float, strike: float, given_price: float, discfactor: float = 1.0, optiontype: str = 'C', tol: float = 1e-8, vol_lower: float = 0.01, vol_upper: float = 10.0, max_iters: int = 100, is_bounds_to_nan: bool = True) -> float` — safeguarded scalar relative-normal inversion.
+- `infer_normal_implied_vol(forward: float, ttm: float, strike: float, given_price: float, discfactor: float = 1.0, optiontype: str = 'C', tol: float = 1e-8, vol_lower: float = 1e-8, vol_upper: float = 1e4, max_iters: int = 100, is_bounds_to_nan: bool = True) -> float` — safeguarded scalar absolute-normal inversion.
 - `infer_normal_ivols_from_model_slice_prices(ttm: float, forward: float, strikes: np.ndarray, optiontypes: np.ndarray, model_prices: np.ndarray, discfactor: float) -> np.ndarray` — one-expiry inversion using scalar defaults.
 - `infer_normal_ivols_from_slice_prices(ttm: float, forward: float, discfactor: float, strikes: np.ndarray, optiontypes: np.ndarray, model_prices: np.ndarray) -> np.ndarray` — discfactor-first slice alias.
 - `infer_normal_ivols_from_chain_prices(ttms: np.ndarray, forwards: np.ndarray, discfactors: np.ndarray, strikes_ttms: List[np.ndarray], optiontypes_ttms: List[np.ndarray], model_prices_ttms: List[np.ndarray]) -> List[np.ndarray]` — per-expiry chain inversion.

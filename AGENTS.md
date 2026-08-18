@@ -34,8 +34,9 @@ non-trivial, check whether it already exists in one of these:
 | `vanilla-option-pricers` | VanillaOptionPricers | Vanilla option pricers and implied volatility fitters |
 
 Actual package dependencies within the stack: `optimalportfolios` depends on `qis`
-and `factorlasso`; `trendfollowing` depends on `qis`; `stochvolmodels` has an
-optional `research` extra that pulls in `qis`. The others are independent.
+and `factorlasso`; `trendfollowing` depends on `qis`; `stochvolmodels` depends on
+`vanilla-option-pricers` and has an optional `research` extra that pulls in `qis`.
+The others are independent.
 
 Do not vendor or copy code between these packages. If functionality belongs in a
 sibling package, say so rather than reimplementing it here.
@@ -177,7 +178,7 @@ publish without the maintainer explicitly asking for a release.
 
 ## Known issues
 
-`pyproject.toml` and `CITATION.cff` declare current release version 1.3.1. The Git tag and PyPI
+`pyproject.toml` and `CITATION.cff` declare current release version 2.0.0. The Git tag and PyPI
 release must use the same version.
 The project advertises Python 3.13 but CI currently stops at 3.12. The installed package uses
 the standard `src/vanilla_option_pricers/` layout; repository-only examples live under root

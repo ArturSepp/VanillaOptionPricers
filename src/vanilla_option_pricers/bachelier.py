@@ -2,11 +2,11 @@
 Bachelier (normal) model: prices, greeks, and implied volatilities.
 
 Prices are quoted on the forward: forward = spot * exp((r - q) * ttm), discounted by
-discfactor = exp(-r * ttm). The volatility argument `vol` is a *relative* normal
-volatility: the absolute normal standard deviation over the period is
-    sdev = forward * vol * sqrt(ttm),
-so `vol` is dimensionless and comparable in magnitude to a lognormal vol. Because sdev
-carries the forward, this parametrisation assumes a positive forward.
+discfactor = exp(-r * ttm). The volatility argument `vol` is annualised absolute normal
+volatility, with the same units as the forward and strike:
+    sdev = vol * sqrt(ttm).
+This convention remains well defined for zero or negative forwards, as required by
+rate-option markets.
 
 Option payoffs, with d = (forward - strike) / sdev and N, n the standard-normal cdf/pdf:
     call:  discfactor * ((F - K) * N(d) + sdev * n(d))
@@ -41,7 +41,7 @@ def compute_normal_price(forward: float,
     """
     Bachelier (normal) forward price of a vanilla option.
 
-    With sdev = forward*vol*sqrt(ttm) and d = (forward - strike) / sdev:
+    With sdev = vol*sqrt(ttm) and d = (forward - strike) / sdev:
         price = discfactor * ((F - K) * N(d) + sdev * n(d))            for a call
         price = discfactor * ((F - K) * (N(d) - 1) + sdev * n(d))      for a put
 
@@ -54,7 +54,7 @@ def compute_normal_price(forward: float,
     ttm : float
         time to maturity, in years.
     vol : float
-        relative normal volatility (absolute sdev = forward*vol*sqrt(ttm)).
+        annualised absolute normal volatility, in forward/strike units.
     discfactor : float, default 1.0
         discount factor exp(-r*ttm) applied to the forward payoff.
     optiontype : str, default 'C'
@@ -70,7 +70,7 @@ def compute_normal_price(forward: float,
     NotImplementedError
         if `optiontype` is not one of 'C', 'P', 'IC', 'IP'.
     """
-    sdev = forward*vol*np.sqrt(ttm)
+    sdev = vol*np.sqrt(ttm)
     d = (forward - strike) / sdev
     if optiontype == 'C' or optiontype == 'IC':
         price = discfactor * ((forward-strike) * ncdf(d) + sdev * npdf(d))
@@ -102,7 +102,7 @@ def compute_normal_slice_prices(ttm: float,
     strikes : np.ndarray
         strikes.
     vols : np.ndarray
-        relative normal vols, aligned with `strikes`.
+        annualised absolute normal vols, aligned with `strikes`.
     optiontypes : np.ndarray
         per-strike option types, aligned with `strikes`.
     discfactor : float, default 1.0
@@ -134,7 +134,7 @@ def compute_normal_delta_to_strike(ttm: float,
     """
     invert a normal delta to the strike that produces it, at fixed vol.
 
-    Using strike = forward - sdev * N^{-1}(delta) with sdev = forward*vol*sqrt(ttm);
+    Using strike = forward - sdev * N^{-1}(delta) with sdev = vol*sqrt(ttm);
     the put branch uses N^{-1}(1 + delta) = -N^{-1}(|delta|) by quantile symmetry.
 
     Parameters
@@ -146,7 +146,7 @@ def compute_normal_delta_to_strike(ttm: float,
     delta : float
         target normal delta; positive for calls, negative for puts.
     vol : float
-        relative normal volatility.
+        annualised absolute normal volatility.
 
     Returns
     -------
@@ -154,7 +154,7 @@ def compute_normal_delta_to_strike(ttm: float,
         strike consistent with `delta`.
     """
     inv_delta = ncdf_inv(delta) if delta > 0.0 else ncdf_inv(1.0+delta)
-    sdev = forward * vol * np.sqrt(ttm)
+    sdev = vol * np.sqrt(ttm)
     strike = forward - sdev*inv_delta
     return strike
 
@@ -170,7 +170,7 @@ def compute_normal_delta_from_lognormal_vol(ttm: float,
     """
     normal delta implied by a given option price.
 
-    Inverts the price to a relative normal vol, then evaluates the normal delta at that
+    Inverts the price to an absolute normal vol, then evaluates the normal delta at that
     vol; degenerates to the intrinsic delta as ttm -> 0.
 
     Parameters
@@ -231,7 +231,7 @@ def compute_normal_delta(ttm: float,
     strike : float
         option strike.
     vol : float
-        relative normal volatility.
+        annualised absolute normal volatility.
     optiontype : str
         'C' or 'P'.
     discfactor : float, default 1.0
@@ -242,7 +242,7 @@ def compute_normal_delta(ttm: float,
     float
         normal delta; np.nan for unsupported optiontype.
     """
-    sdev = forward * vol * np.sqrt(ttm)
+    sdev = vol * np.sqrt(ttm)
     d = (forward - strike) / sdev
     if optiontype == 'C':
         normal_delta = discfactor * ncdf(d)
@@ -276,7 +276,7 @@ def compute_normal_slice_deltas(ttm: Union[float, np.ndarray],
     strikes : float or np.ndarray
         strikes.
     vols : float or np.ndarray
-        relative normal vols, aligned with `strikes`.
+        annualised absolute normal vols, aligned with `strikes`.
     optiontypes : np.ndarray
         per-strike option types ('C'/'P'), aligned with `strikes`.
     discfactor : float, default 1.0
@@ -287,7 +287,7 @@ def compute_normal_slice_deltas(ttm: Union[float, np.ndarray],
     float or np.ndarray
         normal deltas, aligned with `strikes`.
     """
-    sdev = forward * vols * np.sqrt(ttm)
+    sdev = vols * np.sqrt(ttm)
     d = (forward - strikes) / sdev
     d1_sign = np.where(np.array([op == 'C' for op in optiontypes]), 1.0, -1.0)
     normal_deltas = discfactor * d1_sign * ncdf(d1_sign * d)
@@ -313,7 +313,7 @@ def compute_normal_deltas_ttms(ttms: np.ndarray,
     strikes_ttms : List[np.ndarray]
         per-expiry strike slices.
     vols_ttms : List[np.ndarray]
-        per-expiry relative-normal-vol slices.
+        per-expiry absolute-normal-vol slices.
     optiontypes_ttms : List[np.ndarray]
         per-expiry optiontype slices.
 
@@ -338,8 +338,8 @@ def compute_normal_slice_vegas(ttm: float,
     """
     normal vegas for an aligned slice of strikes and vols.
 
-    Derivative of the normal price with respect to the relative vol:
-    vega = forward * n(d) * sqrt(ttm) with d = (forward - strikes) / sdev
+    Derivative of the normal price with respect to the absolute vol:
+    vega = n(d) * sqrt(ttm) with d = (forward - strikes) / sdev
     (undiscounted; multiply by discfactor for d(price)/d(vol)).
 
     Parameters
@@ -351,7 +351,7 @@ def compute_normal_slice_vegas(ttm: float,
     strikes : np.ndarray
         strikes.
     vols : np.ndarray
-        relative normal vols, aligned with `strikes`.
+        annualised absolute normal vols, aligned with `strikes`.
     optiontypes : np.ndarray, optional
         unused; vega is optiontype-independent. Kept for signature symmetry.
 
@@ -360,9 +360,9 @@ def compute_normal_slice_vegas(ttm: float,
     np.ndarray
         normal vegas, aligned with `strikes`.
     """
-    sdev = forward*vols * np.sqrt(ttm)
+    sdev = vols * np.sqrt(ttm)
     d = (forward - strikes) / sdev
-    vegas = forward * npdf(d) * np.sqrt(ttm)
+    vegas = npdf(d) * np.sqrt(ttm)
     return vegas
 
 
@@ -385,7 +385,7 @@ def compute_normal_vegas_ttms(ttms: np.ndarray,
     strikes_ttms : List[np.ndarray]
         per-expiry strike slices.
     vols_ttms : List[np.ndarray]
-        per-expiry relative-normal-vol slices.
+        per-expiry absolute-normal-vol slices.
     optiontypes_ttms : List[np.ndarray]
         per-expiry optiontype slices (unused; kept for symmetry).
 
@@ -408,16 +408,16 @@ def infer_normal_implied_vol(forward: float,
                              discfactor: float = 1.0,
                              optiontype: str = 'C',
                              tol: float = 1e-8,  # convergence tolerance on the implied vol
-                             vol_lower: float = 0.01,  # relative-vol bracket lower bound
-                             vol_upper: float = 10.0,  # relative-vol bracket upper bound
+                             vol_lower: float = 1.0e-8,  # absolute-vol bracket lower bound
+                             vol_upper: float = 1.0e4,  # absolute-vol bracket upper bound
                              max_iters: int = 100,
                              is_bounds_to_nan: bool = True
                              ) -> float:
     """
-    relative normal implied vol from a price, by safeguarded Newton (Newton-Raphson with
+    absolute normal implied vol from a price, by safeguarded Newton (Newton-Raphson with
     bisection fallback) on the bracket [vol_lower, vol_upper].
 
-    Newton uses the analytic normal vega d(price)/d(vol) = discfactor*forward*n(d)*sqrt(ttm);
+    Newton uses the analytic normal vega d(price)/d(vol) = discfactor*n(d)*sqrt(ttm);
     a step leaving the bracket, or one that fails to reduce the residual, falls back to
     bisection. For a vanilla in-the-money option the out-of-the-money counterpart is
     inverted via put-call parity C - P = discfactor*(F - K) for better conditioning; the
@@ -440,10 +440,10 @@ def infer_normal_implied_vol(forward: float,
         'C'/'P' (parity switch applied) or 'IC'/'IP' (inverted directly).
     tol : float, default 1e-8
         absolute convergence tolerance on the implied vol.
-    vol_lower : float, default 0.01
-        lower bound of the relative-vol search bracket.
-    vol_upper : float, default 10.0
-        upper bound of the relative-vol search bracket.
+    vol_lower : float, default 1e-8
+        lower bound of the absolute-vol search bracket.
+    vol_upper : float, default 1e4
+        upper bound of the absolute-vol search bracket.
     max_iters : int, default 100
         maximum solver iterations.
     is_bounds_to_nan : bool, default True
@@ -452,28 +452,31 @@ def infer_normal_implied_vol(forward: float,
     Returns
     -------
     float
-        relative normal implied vol, or np.nan if the price is outside the achievable
+        absolute normal implied vol, or np.nan if the price is outside the achievable
         range and `is_bounds_to_nan` is True.
     """
     # non-positive prices carry no vol information
     if np.isnan(given_price) or given_price <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
 
-    # invert the OTM counterpart for vanillas via put-call parity for conditioning
-    solve_type = optiontype
+    # Invert the OTM counterpart for vanillas via put-call parity for conditioning. Keep
+    # the caller's fixed-width NumPy string type unchanged: assigning a Python string
+    # literal to it cannot be lowered by Numba when this scalar solver is called from a
+    # compiled chain loop.
     target = given_price
+    price_offset = 0.0
     if optiontype == 'C' and strike < forward:
-        target = given_price - discfactor * (forward - strike)
-        solve_type = 'P'
+        price_offset = discfactor * (forward - strike)
+        target = given_price - price_offset
     elif optiontype == 'P' and strike > forward:
-        target = given_price - discfactor * (strike - forward)
-        solve_type = 'C'
+        price_offset = discfactor * (strike - forward)
+        target = given_price - price_offset
     if target <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
 
     sqrt_ttm = np.sqrt(ttm)
-    f_lo = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=solve_type) - target
-    f_hi = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=solve_type) - target
+    f_lo = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+    f_hi = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=optiontype) - price_offset - target
     if f_lo * f_hi > 0.0:  # price not bracketed by [vol_lower, vol_upper]
         if is_bounds_to_nan:
             return np.nan
@@ -487,9 +490,9 @@ def infer_normal_implied_vol(forward: float,
     rts = 0.5 * (vol_lower + vol_upper)
     dx_old = np.abs(vol_upper - vol_lower)
     dx = dx_old
-    f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=solve_type) - target
-    sdev = forward * rts * sqrt_ttm
-    df = discfactor * forward * npdf((forward - strike) / sdev) * sqrt_ttm
+    f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+    sdev = rts * sqrt_ttm
+    df = discfactor * npdf((forward - strike) / sdev) * sqrt_ttm
     for _ in range(max_iters):
         if ((rts - xh) * df - f) * ((rts - xl) * df - f) > 0.0 or np.abs(2.0 * f) > np.abs(dx_old * df):
             dx_old = dx
@@ -506,9 +509,9 @@ def infer_normal_implied_vol(forward: float,
                 break
         if np.abs(dx) < tol:
             break
-        f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=solve_type) - target
-        sdev = forward * rts * sqrt_ttm
-        df = discfactor * forward * npdf((forward - strike) / sdev) * sqrt_ttm
+        f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+        sdev = rts * sqrt_ttm
+        df = discfactor * npdf((forward - strike) / sdev) * sqrt_ttm
         if f < 0.0:
             xl = rts
         else:
@@ -525,7 +528,7 @@ def infer_normal_ivols_from_model_slice_prices(ttm: float,
                                                discfactor: float
                                                ) -> np.ndarray:
     """
-    relative normal implied vols for an aligned slice of model prices at one expiry.
+    absolute normal implied vols for an aligned slice of model prices at one expiry.
 
     Parameters
     ----------
@@ -545,7 +548,7 @@ def infer_normal_ivols_from_model_slice_prices(ttm: float,
     Returns
     -------
     np.ndarray
-        relative normal implied vols, aligned with `strikes` (np.nan where not invertible).
+        absolute normal implied vols, aligned with `strikes` (np.nan where not invertible).
     """
     model_vol_ttm = np.zeros_like(strikes)
     for idx, (strike, model_price, optiontype) in enumerate(zip(strikes, model_prices, optiontypes)):
@@ -565,7 +568,7 @@ def infer_normal_ivols_from_slice_prices(ttm: float,
                                          model_prices: np.ndarray
                                          ) -> List:
     """
-    relative normal implied vols for an aligned slice of prices at one expiry.
+    absolute normal implied vols for an aligned slice of prices at one expiry.
 
     Alias of `infer_normal_ivols_from_model_slice_prices` with the discfactor-first
     argument order used by the chain-level helpers.
@@ -588,7 +591,7 @@ def infer_normal_ivols_from_slice_prices(ttm: float,
     Returns
     -------
     np.ndarray
-        relative normal implied vols, aligned with `strikes`.
+        absolute normal implied vols, aligned with `strikes`.
     """
     model_vol_ttm = np.zeros_like(strikes)
     for idx, (strike, model_price, optiontype) in enumerate(zip(strikes, model_prices, optiontypes)):
@@ -608,7 +611,7 @@ def infer_normal_ivols_from_chain_prices(ttms: np.ndarray,
                                          model_prices_ttms: List[np.ndarray],
                                          ) -> List[np.ndarray]:
     """
-    relative normal implied vols for a whole chain: one price slice per expiry.
+    absolute normal implied vols for a whole chain: one price slice per expiry.
 
     Parameters
     ----------
@@ -628,7 +631,7 @@ def infer_normal_ivols_from_chain_prices(ttms: np.ndarray,
     Returns
     -------
     List[np.ndarray]
-        per-expiry relative-normal-implied-vol slices.
+        per-expiry absolute-normal-implied-vol slices.
     """
     model_vol_ttms = List()
     for ttm, forward, discfactor, strikes, optiontypes, model_prices in zip(ttms, forwards, discfactors, strikes_ttms, optiontypes_ttms, model_prices_ttms):

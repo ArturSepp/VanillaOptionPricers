@@ -47,12 +47,12 @@ workflow below. The committed notebook contains no execution output.
 
 The script prices one aligned BSM slice, recovers all four input volatilities, and checks the
 same-strike call/put pair against forward put-call parity. It also prices and inverts one
-Bachelier call with the package's relative normal-volatility convention:
-`absolute_normal_vol = forward * relative_vol`.
+Bachelier call with annualised absolute normal volatility in the same units as the
+forward and strike.
 
 Successful output reports package version and import path; input/output shapes; option codes and
 prices; maximum IV and parity errors; one cold first-call duration; the mean of ten warm repeats;
-and the Bachelier conversion. Timing values are machine-dependent and are not a benchmark. The
+and the Bachelier result. Timing values are machine-dependent and are not a benchmark. The
 verified numerical errors are required to remain below the explicit thresholds in the script.
 
 Start adaptation with the final `change_first` line: `forward`, `discfactor`, `ttm`, `strikes`,

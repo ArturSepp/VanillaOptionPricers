@@ -4,6 +4,22 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-18
+
+### Changed
+- **Breaking:** all public Bachelier functions now consume and return annualised absolute normal
+  volatility in forward/strike units. Version 1.x used dimensionless relative normal volatility
+  with `absolute_vol = forward * vol`.
+- `compute_normal_price`, normal delta/strike and vega helpers, and every normal implied-volatility
+  inverter now use `sdev = vol * sqrt(ttm)` consistently. Zero and negative forwards are valid.
+- `infer_normal_implied_vol` defaults now bracket absolute volatility on `[1e-8, 1e4]`.
+
+### Fixed
+- Removed the forward multiplier from absolute-normal vegas and safeguarded-Newton derivatives,
+  aligning analytic Greeks and implied-volatility inversion with the standard Bachelier formula.
+- Black and normal chain IV solvers now accept the fixed-width NumPy option-code arrays used by
+  compiled SVM option chains without a Numba string-lowering failure.
+
 ## [1.3.1] - 2026-08-16
 
 ### Added
