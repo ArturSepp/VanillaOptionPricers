@@ -1,69 +1,143 @@
 
-import timeit
-from enum import Enum
+"""Show how fast one ordinary Black-Scholes-Merton call chain is priced."""
 
+import platform
+import sys
+from importlib.metadata import version
+from statistics import median
+from time import perf_counter
+from timeit import repeat as timeit_repeat
+
+import numba
 import numpy as np
 
-import vanilla_option_pricers.black_scholes as bsm
+import vanilla_option_pricers as vop
+
+# This is an opt-in benchmark, even when a user explicitly passes this file to pytest.
+__test__ = False
+
+FORWARD = 100.0
+TTM = 0.5
+DISCOUNT_FACTOR = 0.98
+CHAIN_SIZE = 61
+TIMING_NUMBER = 1_000
+TIMING_REPEATS = 5
 
 
-def test_vector_vs_loop(size: int = 1000):
-    forward = np.random.uniform(1.0, 200.0, size)
-    strike = np.random.uniform(1.0, 200.0, size)
-    ttm = np.random.uniform(0.0, 1.0, size)
-    vol = np.random.uniform(0.1, 1.0, size)
-    optiontype = np.random.choice(['C', 'P'], size)
-    discfactor = np.random.uniform(0.9, 1.0, size)
-
-    def vector_pricer():
-        return bsm.compute_bsm_vanilla_price_vector(forward=forward,
-                                                    strike=strike,
-                                                    ttm=ttm,
-                                                    vol=vol,
-                                                    optiontype=optiontype,
-                                                    discfactor=discfactor)
-
-    def slice_pricer():
-        return bsm.compute_bsm_vanilla_slice_prices(ttm=ttm[0],
-                                                    forward=forward[0],
-                                                    strikes=strike,
-                                                    vols=vol,
-                                                    optiontypes=optiontype,
-                                                    discfactor=discfactor[0])
-
-    def spot_grid():
-        return bsm.compute_bsm_forward_grid_prices(ttm=ttm[0],
-                                                   forwards=forward,
-                                                   strike=strike[0],
-                                                   vol=vol[0],
-                                                   optiontype=optiontype[0],
-                                                   discfactor=discfactor[0])
-
-    slice_pricer()
-    vector_pricer()
-    spot_grid()
-    n = 20
-    print(f"slice_pricer using numba: avg={timeit.Timer(slice_pricer).timeit(n)/n:.4f}")
-    print(f"vector_pricer using vectorize: avg={timeit.Timer(vector_pricer).timeit(n)/n:.4f}")
-    print(f"spot_grid using numba: avg={timeit.Timer(spot_grid).timeit(n)/n:.4f}")
+def make_call_chain(size: int = CHAIN_SIZE) -> tuple[np.ndarray, ...]:
+    """Create calls from strike 70 to 130 with a small volatility smile."""
+    strikes = np.linspace(70.0, 130.0, size)
+    moneyness = strikes / FORWARD - 1.0
+    vols = 0.20 - 0.05 * moneyness + 0.10 * np.square(moneyness)
+    option_types = np.full(strikes.shape, "C")
+    return strikes, vols, option_types
 
 
-class LocalTests(Enum):
-    VECTOR_VS_LOOP = 1
+def price_call_chain(
+    strikes: np.ndarray,
+    vols: np.ndarray,
+    option_types: np.ndarray,
+) -> np.ndarray:
+    """Price every call in the chain in one compiled batch."""
+    return vop.compute_bsm_vanilla_slice_prices(
+        TTM,
+        FORWARD,
+        strikes,
+        vols,
+        option_types,
+        DISCOUNT_FACTOR,
+    )
 
 
-def run_local_test(local_test: LocalTests):
-    """Run local tests for development and debugging purposes.
+def price_call_chain_with_numpy_vectorize(
+    strikes: np.ndarray,
+    vols: np.ndarray,
+    option_types: np.ndarray,
+) -> np.ndarray:
+    """Price the same chain through the convenient NumPy vectorize wrapper."""
+    return vop.compute_bsm_vanilla_price_vector(
+        forward=FORWARD,
+        strike=strikes,
+        ttm=TTM,
+        vol=vols,
+        optiontype=option_types,
+        discfactor=DISCOUNT_FACTOR,
+    )
 
-    These are integration tests that download real data and generate reports.
-    Use for quick verification during development.
-    """
-    np.random.seed(3)
 
-    if local_test == LocalTests.VECTOR_VS_LOOP:
-        test_vector_vs_loop(size=10000)
+def median_seconds_per_call(workflow, number: int, repeats: int) -> float:
+    """Return the median runtime for pricing the whole chain once."""
+    totals = timeit_repeat(workflow, number=number, repeat=repeats)
+    return median(total / number for total in totals)
 
 
-if __name__ == '__main__':
+def validate_prices(prices: np.ndarray) -> None:
+    """Check that ordinary call prices are finite, positive, and strike-decreasing."""
+    if not np.all(np.isfinite(prices)) or np.any(prices < 0.0):
+        raise RuntimeError("The call chain contains an invalid price")
+    if np.any(np.diff(prices) > 0.0):
+        raise RuntimeError("Call prices should decrease as the strike increases")
 
-    run_local_test(local_test=LocalTests.VECTOR_VS_LOOP)
+
+def main() -> None:
+    """Price one familiar option chain and explain its cold and warm timing."""
+    strikes, vols, option_types = make_call_chain()
+
+    started = perf_counter()
+    prices = price_call_chain(strikes, vols, option_types)
+    cold_seconds = perf_counter() - started
+    validate_prices(prices)
+
+    vectorized_prices = price_call_chain_with_numpy_vectorize(strikes, vols, option_types)
+    max_price_difference = float(np.max(np.abs(prices - vectorized_prices)))
+    if max_price_difference > 1e-12:
+        raise RuntimeError(f"The two pricing paths disagree: {max_price_difference}")
+
+    batch_seconds = median_seconds_per_call(
+        lambda: price_call_chain(strikes, vols, option_types),
+        TIMING_NUMBER,
+        TIMING_REPEATS,
+    )
+    vectorized_seconds = median_seconds_per_call(
+        lambda: price_call_chain_with_numpy_vectorize(strikes, vols, option_types),
+        TIMING_NUMBER,
+        TIMING_REPEATS,
+    )
+    prices_per_second = CHAIN_SIZE / batch_seconds
+    speed_ratio = vectorized_seconds / batch_seconds
+    middle = CHAIN_SIZE // 2
+
+    print("BSM speed example: price one 61-strike call chain")
+    print("Market: forward=100, maturity=6 months, discount factor=0.98")
+    print("Strikes: 70 to 130; volatility is about 20% with a small smile")
+    print()
+    print("Three prices from the chain:")
+    print(f"  strike {strikes[0]:.0f}:  call price {prices[0]:.6f}")
+    print(f"  strike {strikes[middle]:.0f}: call price {prices[middle]:.6f}")
+    print(f"  strike {strikes[-1]:.0f}: call price {prices[-1]:.6f}")
+    print()
+    print(f"First chain: {1_000.0 * cold_seconds:.3f} ms (includes Numba compilation)")
+    print(
+        f"Warm chain: {1_000_000.0 * batch_seconds:.3f} microseconds "
+        f"for all {CHAIN_SIZE} calls"
+    )
+    print(f"Warm throughput: {prices_per_second:,.0f} option prices per second")
+    print()
+    print("Warm speed comparison using the same 61 options:")
+    print(f"  Numba batch function:       {1_000_000.0 * batch_seconds:.3f} microseconds")
+    print(
+        "  NumPy vectorize wrapper:    "
+        f"{1_000_000.0 * vectorized_seconds:.3f} microseconds"
+    )
+    print(f"  Numba batch is {speed_ratio:.1f}x faster on this run")
+    print(f"  Maximum price difference: {max_price_difference:.3e}")
+    print()
+    print(
+        f"Environment: {platform.platform()}, Python {sys.version.split()[0]}, "
+        f"NumPy {np.__version__}, Numba {numba.__version__}, "
+        f"package {version('vanilla-option-pricers')}"
+    )
+
+
+if __name__ == "__main__":
+    main()

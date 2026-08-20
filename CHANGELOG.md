@@ -4,6 +4,26 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-20
+
+### Added
+- Added a dedicated Bachelier workflow example covering absolute-normal quote conversion,
+  scalar pricing and inversion, delta-to-strike conversion, aligned slice Greeks, and negative
+  rate forwards.
+
+### Changed
+- Reworked `examples/performance/bsm_speed.py` into a plain 61-strike call-chain example with
+  sample prices, human-readable cold/warm timing, throughput, and an equal-input comparison of
+  the compiled Numba batch function with the `numpy.vectorize` wrapper. It records environment
+  metadata and explicitly opts out of pytest collection.
+- `erfcc` and `ncdf` now call the platform `erfc` implementation directly from Numba and evaluate
+  the normal CDF in a lower-tail-stable form, removing the former `1.2e-7` approximation ceiling
+  and the discontinuity at zero.
+- `inv_erf` and `ncdf_inv` now use an Acklam piecewise rational quantile with a lower-tail Halley
+  refinement and stable central/tail mappings. Independent checks cover probabilities to
+  `1e-300` with near-double-precision agreement, improving `compute_bsm_strike_from_delta` and
+  `compute_normal_delta_to_strike` without adding a dependency or changing their signatures.
+
 ## [2.0.0] - 2026-08-18
 
 ### Changed

@@ -80,7 +80,7 @@ when a pandas helper and differentiable IV-surface diagnostics belong in the sam
 reject or prefer it automatically. [F1, F2, F3]
 
 Choose **`vanilla-option-pricers`** when the inputs are already normalized forwards, discount
-factors, maturities, strikes, and option codes; BSM and relative-Bachelier kernels are enough; and
+factors, maturities, strikes, and option codes; BSM and absolute-Bachelier kernels are enough; and
 keeping the runtime surface to NumPy plus Numba matters. Its explicit slice/grid/chain contracts
 can suit calibration loops, but it is the wrong choice if you need calendars, curves, pandas,
 GPU tensors, or a general instrument object model.

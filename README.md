@@ -87,8 +87,8 @@ VanillaOptionPricers supports the following option types (passed as string param
 Use the authoritative, deterministic
 [pricing and IV script](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/examples/getting_started/pricing_and_iv.py).
 It prices one aligned BSM
-slice, recovers the input implied volatilities, checks put-call parity, demonstrates the relative
-Bachelier convention, and reports cold and warm execution separately.
+slice, recovers the input implied volatilities, checks put-call parity, demonstrates the absolute
+Bachelier volatility convention, and reports cold and warm execution separately.
 
 ```bash
 python examples/getting_started/pricing_and_iv.py

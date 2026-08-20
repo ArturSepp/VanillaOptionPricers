@@ -421,8 +421,8 @@ def infer_normal_implied_vol(forward: float,
     a step leaving the bracket, or one that fails to reduce the residual, falls back to
     bisection. For a vanilla in-the-money option the out-of-the-money counterpart is
     inverted via put-call parity C - P = discfactor*(F - K) for better conditioning; the
-    implied vol is identical for the two by parity. Terminal accuracy is bounded by the
-    1.2e-7 error of `ncdf`.
+    implied vol is identical for the two by parity. Terminal accuracy depends on
+    conditioning, the requested tolerance, and floating-point rounding.
 
     Parameters
     ----------

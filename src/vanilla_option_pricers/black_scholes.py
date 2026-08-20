@@ -416,8 +416,8 @@ def compute_bsm_strike_from_delta(ttm: float,
     invert a bsm forward delta to the strike that produces it, at fixed vol.
 
     strike = F * exp(-s_ttm * (N^{-1}(delta) - 0.5*s_ttm)) with s_ttm = vol*sqrt(ttm).
-    Accuracy is limited by `ncdf_inv` (relative error ~1.3e-4), so this is coarse for
-    fine delta grids.
+    The refined normal quantile retains near-double-precision accuracy in tail delta
+    grids.
 
     Parameters
     ----------
@@ -764,7 +764,8 @@ def infer_bsm_implied_vol(forward: float,
     bisection. For a vanilla in-the-money option the out-of-the-money counterpart is
     inverted via put-call parity C - P = discfactor*(F - K) for better conditioning; the
     implied vol is identical for the two by parity. Typical convergence is 5-8 pricer
-    evaluations; terminal accuracy is bounded by the 1.2e-7 error of `ncdf`.
+    evaluations; terminal accuracy depends on conditioning, the requested tolerance,
+    and floating-point rounding.
 
     Parameters
     ----------

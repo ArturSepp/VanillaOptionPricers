@@ -128,8 +128,8 @@ slice, grid, or chain helper that matches the data layout.
 For the example above, the executed put-call-parity residual was exactly `0.0`. Central finite
 differences produced delta `0.43829106`, discounted gamma `0.02686534`, vega `27.96150047`, and
 theta `-7.20580075`; the analytic values were `0.43829531`, `0.02686519`, `27.96157666`, and
-`-7.20583331`. The small differences are consistent with the package's normal-CDF approximation
-and finite-difference steps, rather than evidence from successful execution alone.
+`-7.20583331`. The small differences are consistent with finite-difference truncation and
+floating-point rounding, rather than evidence from successful execution alone.
 
 See the [complete API inventory](api.md),
 [BSM source](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/src/vanilla_option_pricers/black_scholes.py),
