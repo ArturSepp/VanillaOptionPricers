@@ -1,17 +1,17 @@
 # VanillaOptionPricers (`vanilla-option-pricers`)
 
+[![PyPI](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
+[![Python](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
+[![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](LICENSE.txt)
+[![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml)
+[![Docs](https://readthedocs.org/projects/vanillaoptionpricers/badge/?version=latest)](https://vanillaoptionpricers.readthedocs.io/en/latest/)
+[![Downloads](https://static.pepy.tech/badge/vanilla-option-pricers)](https://pepy.tech/project/vanilla-option-pricers)
+
 **`vanilla-option-pricers` - Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks,
 and implied-volatility fits over NumPy arrays for quantitative research pipelines.**
 
 Install the distribution as `vanilla-option-pricers` and import it as
 `vanilla_option_pricers`.
-
-[![PyPI](https://img.shields.io/pypi/v/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
-[![Python](https://img.shields.io/pypi/pyversions/vanilla-option-pricers?style=flat-square)](https://pypi.org/project/vanilla-option-pricers/)
-[![License](https://img.shields.io/github/license/ArturSepp/VanillaOptionPricers.svg?style=flat-square)](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/LICENSE.txt)
-[![CI](https://github.com/ArturSepp/VanillaOptionPricers/actions/workflows/ci.yml/badge.svg)](https://github.com/ArturSepp/VanillaOptionPricers/actions)
-[![Downloads](https://static.pepy.tech/badge/vanilla-option-pricers)](https://pepy.tech/project/vanilla-option-pricers)
-[![Monthly](https://static.pepy.tech/badge/vanilla-option-pricers/month)](https://pepy.tech/project/vanilla-option-pricers)
 
 ## Why vanilla-option-pricers
 

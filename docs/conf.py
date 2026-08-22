@@ -22,6 +22,18 @@ myst_heading_anchors = 3
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# The publishers reject automated link checks even though these canonical records are live.
+linkcheck_ignore = [
+    r"https://doi\.org/10\.1080/14697688\.2024\.2364804",
+    r"https://ssrn\.com/abstract=4606748",
+]
+# GitHub line anchors drift when the referenced sibling repository changes; still check each file.
+linkcheck_anchors_ignore_for_url = [
+    r"https://github\.com/ArturSepp/StochVolModels/blob/main/",
+]
+# Avoid tripping anonymous-host rate limits by checking external URLs sequentially.
+linkcheck_workers = 1
+
 html_theme = "furo"
 html_baseurl = os.environ.get(
     "READTHEDOCS_CANONICAL_URL",

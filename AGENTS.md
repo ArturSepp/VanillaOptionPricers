@@ -61,20 +61,19 @@ examples/
 ## Commands
 
 ```bash
-pip install -e ".[dev]"
-pytest src/vanilla_option_pricers/tests/ -v          # correctness checks, as CI runs them
+uv sync --locked --group test
+uv run --no-sync pytest                              # correctness checks, as CI runs them
 python examples/performance/bsm_speed.py             # optional local timing diagnostic
-ruff check src/vanilla_option_pricers/ examples/     # lint
+uv run --locked --only-group lint ruff check src/vanilla_option_pricers/ examples/
 ```
 
 Pytest's configured `testpaths` points at `src/vanilla_option_pricers/tests/`. Supported Python
-is >= 3.10. CI runs the correctness suite on Python 3.10 - 3.12 under Ubuntu; the Python 3.13
-classifier is not yet covered by CI. Root `examples/` is repository-only and excluded from the
-wheel.
+is >= 3.10. CI runs the correctness suite on Python 3.10 - 3.14 under Ubuntu and Python 3.12
+under Windows and macOS. Root `examples/` is repository-only and excluded from the wheel.
 
 ## Conventions
 
-- Line length 100 (`ruff`, rules `E`, `F`, `W`, `I`).
+- Line length 100 (`ruff`, rules `E`, `F`, `W`).
 - `pyproject.toml` contains narrow per-file waivers for pre-existing lint debt in the unchanged
   numerical modules and package re-exports. Do not expand those waivers for new code.
 - Scalar pricing functions are Numba dispatchers. Explicit slice, grid, and chain helpers use
@@ -178,8 +177,5 @@ publish without the maintainer explicitly asking for a release.
 
 ## Known issues
 
-`pyproject.toml` and `CITATION.cff` declare current release version 2.0.0. The Git tag and PyPI
-release must use the same version.
-The project advertises Python 3.13 but CI currently stops at 3.12. The installed package uses
-the standard `src/vanilla_option_pricers/` layout; repository-only examples live under root
-`examples/`.
+No Python 3.14 compatibility exclusion is active. The installed package uses the standard
+`src/vanilla_option_pricers/` layout; repository-only examples live under root `examples/`.

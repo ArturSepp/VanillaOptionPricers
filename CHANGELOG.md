@@ -4,6 +4,10 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+### Removed
+- Retired the contributor-facing `dev` extra in favor of PEP 735 `test` and `lint`
+  dependency groups; the user-facing `docs` extra remains available.
+
 ## [2.1.0] - 2026-08-20
 
 ### Added

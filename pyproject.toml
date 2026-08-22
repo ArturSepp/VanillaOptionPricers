@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Office/Business :: Financial :: Investment",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
@@ -45,14 +46,18 @@ docs = [
     "myst-parser>=4.0,<6.0",
     "furo>=2024.8.6",
 ]
-dev = [
+
+[dependency-groups]
+test = [
     "pytest>=7.0.0",
-    "ruff>=0.4",
+]
+lint = [
+    "ruff==0.16.2",
 ]
 
 [project.urls]
 Homepage = "https://github.com/ArturSepp/VanillaOptionPricers"
-Documentation = "https://vanillaoptionpricers.readthedocs.io/en/stable/"
+Documentation = "https://vanillaoptionpricers.readthedocs.io/en/latest/"
 Repository = "https://github.com/ArturSepp/VanillaOptionPricers.git"
 Issues = "https://github.com/ArturSepp/VanillaOptionPricers/issues"
 Changelog = "https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CHANGELOG.md"
@@ -73,12 +78,12 @@ line-length = 100
 src = ["src"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+select = ["E", "F", "W"]
 
 # Preserve byte-for-byte numerical modules during V0b. These narrow waivers describe
 # pre-existing lint debt and must not be expanded for new code.
 [tool.ruff.lint.per-file-ignores]
-"src/vanilla_option_pricers/__init__.py" = ["F401", "I001"]
-"src/vanilla_option_pricers/bachelier.py" = ["E501", "F541", "I001"]
-"src/vanilla_option_pricers/black_scholes.py" = ["E501", "F541", "I001"]
-"src/vanilla_option_pricers/utils.py" = ["E501", "I001"]
+"src/vanilla_option_pricers/__init__.py" = ["F401"]
+"src/vanilla_option_pricers/bachelier.py" = ["E501", "F541"]
+"src/vanilla_option_pricers/black_scholes.py" = ["E501", "F541"]
+"src/vanilla_option_pricers/utils.py" = ["E501"]

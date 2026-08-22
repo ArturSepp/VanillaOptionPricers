@@ -1,0 +1,51 @@
+name: Feature request
+description: Propose a focused addition within the vanilla-pricing boundary
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Pricing or research task
+      description: Describe the task before proposing an API.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_gap
+    attributes:
+      label: Current limitation
+      description: Explain why the existing scalar, aligned-array, grid, or chain helpers do not cover it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: State payoff, forward, discounting, expiry, volatility, and array-shape conventions.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Black-Scholes-Merton analytics
+        - Bachelier analytics
+        - Implied-volatility inversion
+        - Array, grid, or chain helpers
+        - Documentation or deterministic example
+        - Packaging or developer tooling
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Project boundary
+      options:
+        - label: This remains a European vanilla, function-based workflow.
+          required: true
+        - label: This does not require a runtime dependency beyond NumPy and Numba.
+          required: true
