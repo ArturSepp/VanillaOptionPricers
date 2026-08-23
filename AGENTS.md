@@ -179,3 +179,12 @@ publish without the maintainer explicitly asking for a release.
 
 No Python 3.14 compatibility exclusion is active. The installed package uses the standard
 `src/vanilla_option_pricers/` layout; repository-only examples live under root `examples/`.
+
+
+## Python environment
+
+- Keep this repository's Python environment outside OneDrive at `C:\Python\VanillaOptionPricers312`.
+- Never create, use, or install packages into a repository-local `.venv`.
+- Use `C:\Python\VanillaOptionPricers312\Scripts\python.exe` for all Python commands.
+- Run tools through that interpreter, for example `C:\Python\VanillaOptionPricers312\Scripts\python.exe -m pytest` and `C:\Python\VanillaOptionPricers312\Scripts\python.exe -m pip`.
+- If the environment is missing, create it with `py -3.12 -m venv C:\Python\VanillaOptionPricers312`; do not create `.venv` under the repository.
