@@ -1,7 +1,7 @@
 # vanilla-option-pricers
 
 **Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits
-over NumPy arrays for quantitative research pipelines.**
+over NumPy arrays for quantitative research pipelines**
 
 It is a focused, function-based numerical library, not a derivatives framework: callers supply
 forwards, discount factors, maturities, and market conventions.
