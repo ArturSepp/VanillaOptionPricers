@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
-title: "VanillaOptionPricers: Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays"
+title: "vanilla-option-pricers: Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays for quantitative research pipelines"
 authors:
   - family-names: Sepp
     given-names: Artur
