@@ -4,6 +4,10 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+### Changed
+- Migrated project licence metadata to PEP 639 using the SPDX expression `MIT` and
+  declared `LICENSE.txt` as the licence file.
+
 ### Removed
 - Retired the contributor-facing `dev` extra in favor of PEP 735 `test` and `lint`
   dependency groups; the user-facing `docs` extra remains available.
