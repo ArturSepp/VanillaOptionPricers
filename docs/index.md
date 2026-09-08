@@ -8,8 +8,8 @@ myst:
 
 # vanilla-option-pricers
 
-`vanilla-option-pricers` provides Numba-vectorised Black-Scholes-Merton and Bachelier prices,
-Greeks, and implied-volatility fits over NumPy arrays for quantitative research pipelines.
+Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits
+over NumPy arrays for quantitative research pipelines.
 
 Install the distribution as `vanilla-option-pricers` and import it as
 `vanilla_option_pricers`. The public functions consume caller-supplied forwards, discount

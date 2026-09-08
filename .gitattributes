@@ -1,2 +1,23 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Keep repository text portable; never normalise binary assets.
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.rst text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.png binary
+*.PNG binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.npz binary
+*.npy binary
+*.xlsx binary
+*.xls binary
+*.docx binary
+*.pkl binary
+*.pickle binary
+*.parquet binary

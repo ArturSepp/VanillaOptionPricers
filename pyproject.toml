@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanilla-option-pricers"
-version = "2.1.0"
+version = "2.2.0"
 description = "Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays for quantitative research pipelines"
 readme = "README.md"
 license = "MIT"
@@ -86,6 +86,11 @@ extend-select = ["TID251", "TID253", "ICN"]
 "privateassets".msg = "A1: subject packages never import each other."
 "stochvolmodels".msg = "A1: subject packages never import each other."
 "goal_based_allocation".msg = "A1: subject packages never import each other."
+"bbg_fetch".msg = "A1: vanilla-option-pricers has no declared dependency on bbg_fetch."
+"factorlasso".msg = "A1: vanilla-option-pricers has no declared dependency on factorlasso."
+"optimalportfolios".msg = "A1: vanilla-option-pricers has no declared dependency on optimalportfolios."
+"option_chain_analytics".msg = "A1: vanilla-option-pricers has no declared dependency on option_chain_analytics."
+"qis".msg = "A1: vanilla-option-pricers has no declared dependency on qis."
 
 [tool.ruff.lint.flake8-tidy-imports]
 banned-module-level-imports = [

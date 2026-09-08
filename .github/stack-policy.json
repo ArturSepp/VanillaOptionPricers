@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source_registry": "ArturSepp/scripts/public_registry.json",
+  "import": "vanilla_option_pricers",
+  "core": [],
+  "optional": [],
+  "forbidden": [
+    "bbg_fetch",
+    "factorlasso",
+    "goal_based_allocation",
+    "optimalportfolios",
+    "option_chain_analytics",
+    "privateassets",
+    "qis",
+    "stochvolmodels",
+    "trendfollowing"
+  ],
+  "optional_adapters": [],
+  "development_imports": []
+}
