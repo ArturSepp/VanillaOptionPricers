@@ -184,10 +184,6 @@ point-in-time chain workflows and stochastic-volatility models respectively.
   or [`help wanted`](https://github.com/ArturSepp/VanillaOptionPricers/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22help%20wanted%22)
   work.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
-
 ## Citation
 
 A machine-readable citation is available in [`CITATION.cff`](CITATION.cff).
@@ -199,8 +195,12 @@ If you use VanillaOptionPricers in your research, please cite it as:
   title={VanillaOptionPricers: Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays},
   author={Sepp, Artur},
   year={2026},
-  version={2.1.0},
+  version={2.2.0},
   url={https://github.com/ArturSepp/VanillaOptionPricers},
   note={Python package for forward-based vanilla option pricing and implied-volatility fitting}
 }
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
