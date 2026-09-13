@@ -99,6 +99,8 @@ under Windows and macOS. Root `examples/` is repository-only and excluded from t
 - Do not promise arbitrary broadcasting. Scalar functions, `numpy.vectorize` wrappers, aligned
   slice/grid arrays, and per-expiry chain containers are distinct public paths.
 - There is no object model, calendar handling, or pandas integration.
+- Repository examples define a `Locals` enum and a `run_local(local=...)` dispatcher. Their
+  `__main__` guards contain only that call with one explicit enum member.
 - New functionality should come with a numerical check against a reference value or
   against put-call parity.
 
@@ -115,15 +117,10 @@ under Windows and macOS. Root `examples/` is repository-only and excluded from t
 
 ## Repository-specific agent artefacts
 
-By maintainer direction, all VanillaOptionPricers roadmaps, execution plans, audits, and
-reports live in the ignored `agents/` directory. This repository-specific rule overrides the
-generic roadmap location inside the generated shared-agent block below; do not edit that
-generated block directly.
-
 <!-- ===== SHARED AGENT CORE (standalone variant) — begin =====
      Generated from SHARED_AGENT_CORE.md in the maintainer's project knowledge. Do not hand-edit
      between these markers — propose the change to the maintainer instead. Variants: builder
-     (qis) / consumer / standalone. Last synced 2026-09-08, agent core v1.5 -->
+     (qis) / consumer / standalone. Last synced 2026-09-13, agent core v1.6 -->
 
 ## Domain invariants
 
@@ -171,11 +168,14 @@ between your read of it and your write.
 - Prefer minimal anchored edits over whole-file replacement. If the on-disk content is not what
   you expected, stop and reconcile your change onto the current content rather than overwrite.
 
-## Roadmap execution
+## Agent-generated artifacts
 
-Feature roadmaps live at the repository root as `ROADMAP_<feature>.md`. An execution request
-names the file and the stage. A stage is complete when its stated verification command passes;
-its out-of-scope list is binding.
+All agent-generated roadmaps, execution plans, audits, reports, handoffs, and other working
+outputs live under the repository-root `agents/` directory, which is local and ignored by Git.
+Never create `ROADMAP_*.md`, `Claude outputs/`, `Codex outputs/`, or similar agent-output
+artifacts at the repository root. Name feature roadmaps `agents/ROADMAP_<feature>.md`. An
+execution request names the file and stage. A stage is complete when its stated verification
+command passes; its out-of-scope list is binding.
 
 <!-- ===== SHARED AGENT CORE — end ===== -->
 

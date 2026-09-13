@@ -3,6 +3,7 @@
 
 import platform
 import sys
+from enum import Enum
 from importlib.metadata import version
 from statistics import median
 from time import perf_counter
@@ -22,6 +23,12 @@ DISCOUNT_FACTOR = 0.98
 CHAIN_SIZE = 61
 TIMING_NUMBER = 1_000
 TIMING_REPEATS = 5
+
+
+class Locals(Enum):
+    """Available local performance diagnostics."""
+
+    BSM_SPEED = 1
 
 
 def make_call_chain(size: int = CHAIN_SIZE) -> tuple[np.ndarray, ...]:
@@ -79,8 +86,11 @@ def validate_prices(prices: np.ndarray) -> None:
         raise RuntimeError("Call prices should decrease as the strike increases")
 
 
-def main() -> None:
+def run_local(local: Locals) -> None:
     """Price one familiar option chain and explain its cold and warm timing."""
+    if local != Locals.BSM_SPEED:
+        raise ValueError(f"Unsupported local case: {local}")
+
     strikes, vols, option_types = make_call_chain()
 
     started = perf_counter()
@@ -140,4 +150,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_local(local=Locals.BSM_SPEED)

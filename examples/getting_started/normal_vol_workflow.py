@@ -1,8 +1,18 @@
 """Practical Bachelier workflows using annualised absolute normal volatility."""
 
+from enum import Enum
+
 import numpy as np
 
 import vanilla_option_pricers as vop
+
+
+class Locals(Enum):
+    """Available local normal-volatility workflows."""
+
+    EQUITY_FORWARD = 1
+    NEGATIVE_RATE_SLICE = 2
+    ALL_WORKFLOWS = 3
 
 
 def run_equity_forward_example() -> None:
@@ -115,12 +125,15 @@ def run_negative_rate_slice_example() -> None:
     print(f"max_iv_error={max_iv_error:.3e} parity_error={parity_error:.3e}")
 
 
-def main() -> None:
-    """Run both normal-volatility examples."""
-    run_equity_forward_example()
-    print()
-    run_negative_rate_slice_example()
+def run_local(local: Locals) -> None:
+    """Run the selected normal-volatility workflow."""
+    if local in (Locals.EQUITY_FORWARD, Locals.ALL_WORKFLOWS):
+        run_equity_forward_example()
+    if local == Locals.ALL_WORKFLOWS:
+        print()
+    if local in (Locals.NEGATIVE_RATE_SLICE, Locals.ALL_WORKFLOWS):
+        run_negative_rate_slice_example()
 
 
 if __name__ == "__main__":
-    main()
+    run_local(local=Locals.ALL_WORKFLOWS)
