@@ -41,7 +41,8 @@
   "required_jobs": [
     "preflight",
     "ci",
-    "docs"
+    "docs",
+    "references"
   ],
   "workflow_inventory": {
     "ci": {
@@ -90,5 +91,22 @@
         "Check documentation links"
       ]
     }
-  }
+  },
+  "audit": false,
+  "consumers": [
+    {
+      "repository": "ArturSepp/StochVolModels",
+      "module": "stochvolmodels",
+      "extra": "",
+      "sdk": false,
+      "commit": "2d90efba42ed9c8db71c59844208ca7898554686"
+    },
+    {
+      "repository": "ArturSepp/OptionChainAnalytics",
+      "module": "option_chain_analytics",
+      "extra": "",
+      "sdk": false,
+      "commit": "d6428227e3d56ac45492747e2ed96d37f6bc9266"
+    }
+  ]
 }
