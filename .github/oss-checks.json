@@ -1,0 +1,112 @@
+{
+  "version": "1.0.0",
+  "repository": "VanillaOptionPricers",
+  "package": "vanilla_option_pricers",
+  "python_environment": "VanillaOptionPricers312",
+  "lint_paths": [
+    "src/vanilla_option_pricers/*.py",
+    "tests/*.py",
+    "examples/*.py"
+  ],
+  "preflight": [],
+  "docs": [
+    [
+      "-m",
+      "sphinx",
+      "-E",
+      "-W",
+      "--keep-going",
+      "-b",
+      "html",
+      "docs",
+      "{output}/html"
+    ]
+  ],
+  "tests": [
+    [
+      "-m",
+      "pytest",
+      "-o",
+      "cache_dir={output}/pytest"
+    ]
+  ],
+  "remote_only": [
+    "supported Python/OS matrix",
+    "clean core/extras environments",
+    "wheel and sdist",
+    "coverage gates",
+    "dependency floors and live compatibility",
+    "online link and security health"
+  ],
+  "required_jobs": [
+    "preflight",
+    "ci",
+    "docs",
+    "references"
+  ],
+  "workflow_inventory": {
+    "ci": {
+      "test": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "Install uv and Python ${{ matrix.python-version }}",
+        "Sync the test environment",
+        "Verify imports",
+        "Run tests"
+      ],
+      "lint": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "Install uv and Python",
+        "Check lint"
+      ],
+      "wheel": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "Install uv and Python",
+        "Build the wheel from the source distribution",
+        "Assert distribution contents",
+        "Install the wheel into a clean environment",
+        "Exercise the installed wheel from outside the checkout"
+      ],
+      "stack-policy": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d",
+        "Exercise policy regressions",
+        "Check stack imports and optional adapter isolation"
+      ],
+      "lowest-dependencies": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d",
+        "Keep the test environment outside the checkout",
+        "Resolve a fresh lowest-direct test environment",
+        "Record installed versions",
+        "Check optional dependencies stay outside package-root import",
+        "Test declared dependency floors without live provider credentials"
+      ]
+    },
+    "docs": {
+      "docs": [
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "Install uv and Python",
+        "Sync documentation environment",
+        "Build HTML with warnings as errors",
+        "Check documentation links"
+      ]
+    }
+  },
+  "audit": false,
+  "consumers": [
+    {
+      "repository": "ArturSepp/StochVolModels",
+      "module": "stochvolmodels",
+      "extra": "",
+      "sdk": false,
+      "commit": "2d90efba42ed9c8db71c59844208ca7898554686"
+    },
+    {
+      "repository": "ArturSepp/OptionChainAnalytics",
+      "module": "option_chain_analytics",
+      "extra": "",
+      "sdk": false,
+      "commit": "d6428227e3d56ac45492747e2ed96d37f6bc9266"
+    }
+  ]
+}
