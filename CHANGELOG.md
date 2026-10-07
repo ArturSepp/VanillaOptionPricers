@@ -4,6 +4,8 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-10-07
+
 ### Fixed
 
 - Titled documentation pages other than the homepage `<page title> - vanilla-option-pricers`

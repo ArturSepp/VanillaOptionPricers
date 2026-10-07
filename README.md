@@ -195,7 +195,7 @@ If you use VanillaOptionPricers in your research, please cite it as:
   title={VanillaOptionPricers: Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits over NumPy arrays},
   author={Sepp, Artur},
   year={2026},
-  version={2.2.0},
+  version={2.2.1},
   url={https://github.com/ArturSepp/VanillaOptionPricers},
   note={Python package for forward-based vanilla option pricing and implied-volatility fitting}
 }
