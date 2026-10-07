@@ -4,6 +4,18 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+### Fixed
+
+- Titled documentation pages other than the homepage `<page title> - vanilla-option-pricers`
+  instead of ending every title with the full site title, which search results cut off.
+
+- Made documentation pages built for the `stable` version name their `latest` address as
+  canonical, so search engines no longer see each page twice. Numbered versions keep their own
+  address, and the homepage names the site root rather than `index.html`. No signature or
+  computed value changes.
+
+- Added the missing meta description to the getting-started page.
+
 ## [2.2.0] - 2026-09-08
 
 ### Added
