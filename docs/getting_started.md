@@ -1,3 +1,12 @@
+---
+myst:
+  html_meta:
+    description: >-
+      Install vanilla-option-pricers from PyPI and run the offline first example: a
+      Black-Scholes-Merton slice priced and inverted to implied volatility, a put-call parity
+      check, and a Bachelier call in normal volatility.
+---
+
 # Installation and a first result
 
 ## Install
