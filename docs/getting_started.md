@@ -9,6 +9,40 @@ myst:
 
 # Installation and a first result
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ebf17a911688c0820c5082d66df3cd9131d554af)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
+Price a fixed four-option slice and recover its implied volatilities on a CPU.
+
+## Release boundary and reproducible first use
+
+The verified release floor for this workflow is **vanilla-option-pricers 2.2.1** on Python
+3.12. This is a tested support floor, not a claim about the first historical introduction.
+The package remains Beta; retain the explicit model and shape conventions when upgrading.
+[Stable documentation](https://vanillaoptionpricers.readthedocs.io/en/stable/) describes the
+release channel; [latest](https://vanillaoptionpricers.readthedocs.io/en/latest/) follows main
+and can describe unreleased changes. The rendered site's build version identifies its source;
+a stable alias is not proof of the newest PyPI upload.
+
+For a reproducible trial, install the core distribution without extras and save the existing
+script from the verified source revision. Run these commands in a working directory and Python
+environment outside synchronized folders:
+
+```powershell
+python -m pip install "vanilla-option-pricers==2.2.1"
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ArturSepp/VanillaOptionPricers/9d4ebd193923f233dc10c82ae412d32929b6d757/examples/getting_started/pricing_and_iv.py' -OutFile pricing_and_iv.py
+python pricing_and_iv.py
+```
+
+Installation and fetching the script need internet access; execution is offline and writes no
+files. The wheel excludes repository examples. The script prints the actual distribution
+version and import path, four prices, round-trip/parity errors and separate cold/warm durations.
+Allow Numba's first-call compilation to finish; measure installation separately from execution.
+There is no promised time-to-first-result. Core needs NumPy and Numba; docs and hosted notebooks
+are optional routes, not prerequisites.
+
 ## Install
 
 Install the released package from PyPI:
