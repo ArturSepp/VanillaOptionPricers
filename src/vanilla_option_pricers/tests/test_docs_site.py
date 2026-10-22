@@ -29,8 +29,9 @@ def _load_conf() -> dict:
 @pytest.mark.parametrize(
     ("service_url", "canonical_url"),
     [
-        # stable and latest serve the same pages, so both name latest as canonical
-        ("https://vanillaoptionpricers.readthedocs.io/en/stable/", LATEST),
+        # Each release channel keeps its own canonical source URL.
+        ("https://vanillaoptionpricers.readthedocs.io/en/stable/",
+         "https://vanillaoptionpricers.readthedocs.io/en/stable/"),
         (LATEST, LATEST),
         (
             "https://vanillaoptionpricers.readthedocs.io/en/2.2.0/",
@@ -38,8 +39,8 @@ def _load_conf() -> dict:
         ),
     ],
 )
-def test_stable_builds_name_latest_as_canonical(monkeypatch, service_url, canonical_url) -> None:
-    """A ``stable`` build points its canonical URLs at ``latest``; numbered versions keep theirs."""
+def test_builds_preserve_their_channel_canonical(monkeypatch, service_url, canonical_url) -> None:
+    """Stable, latest and numbered builds retain their own canonical source URLs."""
     monkeypatch.setenv("READTHEDOCS_CANONICAL_URL", service_url)
     assert _load_conf()["html_baseurl"] == canonical_url
 

@@ -1,5 +1,10 @@
 # Contributing to VanillaOptionPricers
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-22](https://github.com/ArturSepp/VanillaOptionPricers/commit/471989cc2b140f9bec00c9f7440b5f8eda162ddf)*
+
+Source: [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Thanks for your interest in `vanilla-option-pricers`. The package is deliberately small: it
 provides fast, function-based Black-Scholes-Merton and Bachelier analytics without becoming a
 general derivatives framework.
@@ -24,6 +29,58 @@ Use the bug-report template and include the package version, Python version, ope
 minimal self-contained reproducer, and the full traceback or incorrect output. For a numerical
 problem, state the forward, strike, expiry, discount factor, volatility convention, and option
 type, and include the independent value or identity used for comparison.
+
+## Starter tasks
+
+These are bounded proposals, not assigned issues or confirmed defects. Recheck current source
+and open work, then agree one task with the maintainer. Keep numerical kernels, public
+signatures, dependencies and example/notebook source unchanged for these documentation tasks.
+Use the existing [feature form](https://github.com/ArturSepp/VanillaOptionPricers/issues/new?template=feature_request.yml)
+with Area **Documentation or deterministic example**. Include the task ID, exact paths,
+reproduction, acceptance and focused check under Proposed behavior; retain both boundary
+checkboxes. Use the bug form only for observed incorrect behaviour.
+
+### VOP-1: clarify first-use output
+
+Owner: VanillaOptionPricers. Edit only `docs/getting_started.md` to clarify one observed setup
+or output-reading ambiguity. Preserve the canonical script, literalinclude and checked Colab
+mirror. Acceptance: another reader can locate the four prices and both error checks.
+
+```console
+python examples/getting_started/pricing_and_iv.py
+python -m pytest src/vanilla_option_pricers/tests/test_colab_quickstart.py -q
+```
+
+### VOP-2: clarify Bachelier units
+
+Owner: VanillaOptionPricers. Edit only `docs/bachelier_convention.md` to clarify one confusion
+between absolute normal volatility and lognormal percentage volatility. Preserve formulas,
+constants and results. Acceptance: the forward, strike and normal-volatility units are explicit.
+
+```console
+python -m pytest src/vanilla_option_pricers/tests/test_bachelier.py -k "absolute or negative" -q
+```
+
+### VOP-3: check release navigation
+
+Owner: VanillaOptionPricers. Edit only `docs/getting_started.md` to clarify one stable/latest
+or source-only boundary, linking the same canonical example. Acceptance: a reader can distinguish
+the tested released path from main. Preserve models, release metadata and the theme.
+
+```console
+python -m pytest src/vanilla_option_pricers/tests/test_docs_site.py -q
+```
+
+Run the package's existing strict HTML command after a documentation edit and inspect the
+rendered passage. On the maintainer OneDrive checkout, first dot-source the shared
+`Enter-AgentRepo.ps1` and use `C:\Python\VanillaOptionPricers312\Scripts\python.exe`;
+keep caches, builds and disposable source exports on C. The normal `uv` commands below are for
+ordinary contributor checkouts outside OneDrive; do not create `.venv` in a synchronized folder.
+
+For review, follow the [shared contribution review guidance](https://github.com/ArturSepp/ArturSepp/blob/main/docs/contributing_to_stack.md#review-attribution-and-automation-assisted-changes).
+State source revision, actual versions, exact checks, skipped checks, rendered review and material
+automation assistance. Keep the MIT boundary and existing attribution. Automated command runs
+do not substitute for an independent reader; no response-time or acceptance promise is made.
 
 ## Development setup
 
