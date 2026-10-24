@@ -8,6 +8,11 @@ myst:
 
 # Numerical accuracy and performance
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/3ca1ad578ae13f4452a50e905429ae9f48082154)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Use this page to interpret numerical output and timing. Function success does not prove that an
 input is well conditioned, and a warm timing does not describe first-call latency.
 

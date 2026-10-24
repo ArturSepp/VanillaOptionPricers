@@ -1,5 +1,10 @@
 # Examples
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ebf17a911688c0820c5082d66df3cd9131d554af)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Examples import the installed public `vanilla_option_pricers` API. From the repository root,
 install the project before running them:
 

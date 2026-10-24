@@ -8,6 +8,11 @@ myst:
 
 # vanilla-option-pricers
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ebf17a911688c0820c5082d66df3cd9131d554af)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Numba-vectorised Black-Scholes-Merton and Bachelier prices, Greeks, and implied-volatility fits
 over NumPy arrays for quantitative research pipelines.
 

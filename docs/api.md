@@ -6,6 +6,11 @@ myst:
 
 # Package-root API
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ae0e184c55b30824bfc957ffd7eb7e3d0a9749d5)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 The public import surface in `src/vanilla_option_pricers/__init__.py` contains 39 callable names.
 The signatures below preserve the current source argument order, annotations, and defaults.
 `List` means `numba.typed.List`; `np.ndarray` means a NumPy array. The five `*_vector` objects are

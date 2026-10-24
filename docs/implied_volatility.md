@@ -7,6 +7,11 @@ myst:
 
 # Implied volatility
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ae0e184c55b30824bfc957ffd7eb7e3d0a9749d5)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Use implied-volatility functions when an observed or model price, forward, discount factor,
 maturity, strike, and option type are already expressed in one consistent convention. BSM returns
 annualised lognormal volatility. Bachelier returns annualised absolute normal volatility in the

@@ -2,7 +2,7 @@
 
 *Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-22](https://github.com/ArturSepp/VanillaOptionPricers/commit/471989cc2b140f9bec00c9f7440b5f8eda162ddf)*
 
-Source: [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
 Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
 
 Thanks for your interest in `vanilla-option-pricers`. The package is deliberately small: it

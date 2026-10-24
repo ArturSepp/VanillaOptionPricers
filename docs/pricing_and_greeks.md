@@ -8,6 +8,11 @@ myst:
 
 # Pricing and Greeks
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/ae0e184c55b30824bfc957ffd7eb7e3d0a9749d5)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 Use this page when you already have a forward, discount factor, maturity, strike, volatility, and
 option type. The package prices the supplied forward payoff; it does not build spots, forwards,
 rates, dividends, discount curves, calendars, or settlement conventions.

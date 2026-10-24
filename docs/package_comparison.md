@@ -8,6 +8,11 @@ myst:
 
 # Choosing a vanilla-option pricing package
 
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-08-16](https://github.com/ArturSepp/VanillaOptionPricers/commit/99e5366bace9f2729cf0d49ce99e71f2f6f4d020)*
+
+Implemented in [VanillaOptionPricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
+
 There is no universal winner in this comparison. A two-dependency array kernel, a scalar formula
 library, a pandas-oriented compatibility layer, a multi-backend tensor library, and a full
 derivatives framework solve different problems.
