@@ -19,30 +19,32 @@ same units as the forward and strike.
 
 ## Scalar solver contract
 
-Both scalar solvers use safeguarded Newton iteration with bisection fallback. The residual is the
-model price minus `given_price`; `tol` is an absolute tolerance on the volatility step, not a
-price or relative-error tolerance.
+The Black solver uses Peter Jaeckel's transformed rational initial guess followed by
+Householder refinement, adapted from [Let's Be Rational](http://www.jaeckel.org/LetsBeRational.pdf),
+reference revision 1520 (2024). It normally needs two corrections; exactly ATM prices use an
+inverse-error-function formula. The Bachelier solver retains safeguarded Newton iteration with
+bisection fallback. `tol` is an absolute volatility-step tolerance, not a price or relative-error
+tolerance. `max_iters` limits refinements; an exhausted limit returns the last iterate and does
+not certify convergence. The Black initial guess is independent of the caller's bounds, which
+are applied to the resulting volatility. These numerical changes are unreleased.
 
 | Argument | BSM default | Normal default | Meaning |
 |---|---:|---:|---|
 | `tol` | `1e-8` | `1e-8` | Absolute volatility-step convergence tolerance. |
 | `vol_lower` | `0.01` | `1e-8` | Lower bracket endpoint. |
 | `vol_upper` | `5.0` | `1e4` | Upper bracket endpoint. |
-| `max_iters` | `100` | `100` | Maximum safeguarded iterations. |
+| `max_iters` | `100` | `100` | Maximum iterative corrections. |
 | `is_bounds_to_nan` | `True` | `True` | Return `nan` for an unbracketed/non-positive target; when `False`, return the violated bracket bound. |
 
-For vanilla `"C"` and `"P"`, an in-the-money price is transformed to its out-of-the-money
-counterpart using (C-P=D(F-K)) before inversion. This improves conditioning without changing
-the implied volatility. `"IC"` and `"IP"` are inverted directly; this page does not supply the
-external inverse-quote normalisation.
+In-the-money prices are transformed to their out-of-the-money counterparts using
+put-call parity. Both solvers then evaluate the OTM formula directly. `"IC"` and `"IP"` continue
+to share the respective call and put payoff branches; callers still own external inverse-quote
+normalisation. No solver can recover time value already lost when an ITM input price was rounded.
 
 ## Scalar, slice, and chain example
 
-The current Numba runtime needs dynamic string containers during IV parity conditioning. Price
-generation below uses NumPy option-code arrays, while IV slice/chain inversion uses
-`numba.typed.List` strings. This is a documented implementation limitation: although the current
-source annotations say `np.ndarray`, a fixed-width NumPy Unicode array can raise a Numba
-`TypingError` in these IV helpers. No API or solver change is made in V4a.
+The example uses `numba.typed.List` strings. Fixed-width NumPy Unicode option-code arrays are
+also supported by the compiled price and IV loops, including the `"IC"` and `"IP"` codes.
 
 ```python
 import numpy as np

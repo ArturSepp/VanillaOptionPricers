@@ -63,7 +63,7 @@ For units, shapes, interpretation, and failure behavior, start with
 
 ## BSM implied volatility
 
-- `infer_bsm_implied_vol(forward: float, ttm: float, strike: float, given_price: float, discfactor: float = 1.0, optiontype: str = 'C', tol: float = 1e-8, vol_lower: float = 0.01, vol_upper: float = 5.0, max_iters: int = 100, is_bounds_to_nan: bool = True) -> float` — safeguarded scalar inversion.
+- `infer_bsm_implied_vol(forward: float, ttm: float, strike: float, given_price: float, discfactor: float = 1.0, optiontype: str = 'C', tol: float = 1e-8, vol_lower: float = 0.01, vol_upper: float = 5.0, max_iters: int = 100, is_bounds_to_nan: bool = True) -> float` — transformed-rational scalar inversion with the caller's volatility bounds.
 - `infer_bsm_ivols_from_model_slice_prices(ttm: float, forward: float, strikes: np.ndarray, optiontypes: np.ndarray, model_prices: np.ndarray, discfactor: float, vol_lower: float = 0.01, vol_upper: float = 5.0, max_iters: int = 100, is_bounds_to_nan: bool = True) -> np.ndarray` — configurable one-expiry inversion.
 - `infer_bsm_ivols_from_slice_prices(ttm: float, forward: float, discfactor: float, strikes: np.ndarray, optiontypes: np.ndarray, model_prices: np.ndarray) -> np.ndarray` — discfactor-first slice convenience.
 - `infer_bsm_ivols_from_model_chain_prices(ttms: np.ndarray, forwards: np.ndarray, discfactors: np.ndarray, strikes_ttms: List[np.ndarray], optiontypes_ttms: List[np.ndarray], model_prices_ttms: List[np.ndarray]) -> List[np.ndarray]` — per-expiry chain inversion.

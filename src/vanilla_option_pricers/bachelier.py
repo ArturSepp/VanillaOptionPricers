@@ -28,9 +28,20 @@ from numba.typed import List
 
 # vanilla_option_pricers
 from vanilla_option_pricers.utils import ncdf, npdf, ncdf_inv
+from vanilla_option_pricers._black_special import _yprime
 
 
-@njit(cache=False, fastmath=True)
+@njit(cache=False)
+def _normal_otm_price(distance: float, sdev: float) -> float:
+    """Normal time value with no CDF subtraction, using Jaeckel's stable Yprime."""
+    if sdev <= 0.0:
+        return 0.0
+    d = distance / sdev
+    return sdev * npdf(d) * _yprime(-d)
+
+
+
+@njit(cache=False)
 def compute_normal_price(forward: float,
                          strike: float,
                          ttm: float,
@@ -70,16 +81,16 @@ def compute_normal_price(forward: float,
     NotImplementedError
         if `optiontype` is not one of 'C', 'P', 'IC', 'IP'.
     """
-    sdev = vol*np.sqrt(ttm)
-    d = (forward - strike) / sdev
     if optiontype == 'C' or optiontype == 'IC':
-        price = discfactor * ((forward-strike) * ncdf(d) + sdev * npdf(d))
+        intrinsic = max(forward - strike, 0.0)
     elif optiontype == 'P' or optiontype == 'IP':
-        price = discfactor * ((forward - strike) * (ncdf(d)-1.0) + sdev * npdf(d))
+        intrinsic = max(strike - forward, 0.0)
     else:
-        raise NotImplementedError(f"optiontype")
-
-    return price
+        raise NotImplementedError("optiontype")
+    if ttm <= 0.0 or vol <= 0.0:
+        return discfactor * intrinsic
+    time_value = _normal_otm_price(abs(forward - strike), vol*np.sqrt(ttm))
+    return discfactor * (intrinsic + time_value)
 
 
 @njit(cache=False, fastmath=True)
@@ -400,7 +411,7 @@ def compute_normal_vegas_ttms(ttms: np.ndarray,
     return vegas_ttms
 
 
-@njit(cache=False, fastmath=True)
+@njit(cache=False)
 def infer_normal_implied_vol(forward: float,
                              ttm: float,
                              strike: float,
@@ -437,7 +448,7 @@ def infer_normal_implied_vol(forward: float,
     discfactor : float, default 1.0
         discount factor exp(-r*ttm).
     optiontype : str, default 'C'
-        'C'/'P' (parity switch applied) or 'IC'/'IP' (inverted directly).
+        'C'/'IC' or 'P'/'IP'; the existing payoff normalization is retained.
     tol : float, default 1e-8
         absolute convergence tolerance on the implied vol.
     vol_lower : float, default 1e-8
@@ -465,19 +476,22 @@ def infer_normal_implied_vol(forward: float,
     # compiled chain loop.
     target = given_price
     price_offset = 0.0
-    if optiontype == 'C' and strike < forward:
+    if (optiontype == 'C' or optiontype == 'IC') and strike < forward:
         price_offset = discfactor * (forward - strike)
         target = given_price - price_offset
-    elif optiontype == 'P' and strike > forward:
+    elif (optiontype == 'P' or optiontype == 'IP') and strike > forward:
         price_offset = discfactor * (strike - forward)
         target = given_price - price_offset
     if target <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
 
+    if optiontype not in ('C', 'P', 'IC', 'IP'):
+        raise NotImplementedError("optiontype")
     sqrt_ttm = np.sqrt(ttm)
-    f_lo = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-    f_hi = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-    if f_lo * f_hi > 0.0:  # price not bracketed by [vol_lower, vol_upper]
+    distance = abs(forward - strike)
+    f_lo = discfactor * _normal_otm_price(distance, vol_lower * sqrt_ttm) - target
+    f_hi = discfactor * _normal_otm_price(distance, vol_upper * sqrt_ttm) - target
+    if (f_lo > 0.0 and f_hi > 0.0) or (f_lo < 0.0 and f_hi < 0.0):  # price not bracketed by [vol_lower, vol_upper]
         if is_bounds_to_nan:
             return np.nan
         return vol_lower if f_lo > 0.0 else vol_upper
@@ -490,7 +504,7 @@ def infer_normal_implied_vol(forward: float,
     rts = 0.5 * (vol_lower + vol_upper)
     dx_old = np.abs(vol_upper - vol_lower)
     dx = dx_old
-    f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+    f = discfactor * _normal_otm_price(distance, rts * sqrt_ttm) - target
     sdev = rts * sqrt_ttm
     df = discfactor * npdf((forward - strike) / sdev) * sqrt_ttm
     for _ in range(max_iters):
@@ -509,7 +523,7 @@ def infer_normal_implied_vol(forward: float,
                 break
         if np.abs(dx) < tol:
             break
-        f = compute_normal_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
+        f = discfactor * _normal_otm_price(distance, rts * sqrt_ttm) - target
         sdev = rts * sqrt_ttm
         df = discfactor * npdf((forward - strike) / sdev) * sqrt_ttm
         if f < 0.0:

@@ -4,6 +4,29 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+### Changed
+
+- Black pricing and implied volatility use internal Numba kernels adapted from Peter
+  Jaeckel's Let's Be Rational revision 1520 (2024): stable normalized OTM pricing,
+  rational initial guesses, transformed tail objectives, and Householder refinement.
+  ATM pricing/inversion use the error function and its inverse. Public signatures,
+  default volatility bounds, option codes, and NumPy/Numba dependencies are unchanged.
+
+### Fixed
+
+- Bachelier prices evaluate the OTM time value without subtracting the CDF from one,
+  eliminating negative and inaccurate far-OTM put prices. Both IV solvers actually
+  evaluate the OTM counterpart after removing observed intrinsic value.
+- Zero-diffusion Black and Bachelier prices return discounted intrinsic value.
+
+### Added
+
+- Independent 110-digit price and IV fixtures covering tails, region boundaries,
+  tiny total volatility, scale changes, inverse option codes, and near-maximum prices.
+- A reproducible compiled-batch benchmark against a preserved pre-change Black solver;
+  initialization/compilation are excluded and accuracy is reported alongside timing.
+
+
 ## [2.2.1] - 2026-10-07
 
 ### Fixed

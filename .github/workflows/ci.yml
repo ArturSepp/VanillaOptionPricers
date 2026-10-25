@@ -119,6 +119,8 @@ jobs:
     - name: Assert distribution contents
       run: |
         uv run --no-project python - <<'PY'
+        from email.parser import Parser
+        from pathlib import Path
         import glob
         import tarfile
         import zipfile
@@ -137,6 +139,21 @@ jobs:
         forbidden = {"run_local", "docs", "__pycache__"}
         assert not any(forbidden.intersection(name.split("/")) for name in wheel_names)
         assert not any(name.endswith((".pyc", ".pyo")) for name in wheel_names)
+
+        # Both artefacts must retain the exact project licence and scoped notices.
+        with zipfile.ZipFile(wheels[0]) as wheel, tarfile.open(sdists[0]) as sdist:
+            for filename in ("LICENSE.txt", "THIRD_PARTY_NOTICES.txt"):
+                expected = Path(filename).read_bytes()
+                wheel_paths = [n for n in wheel_names if n.endswith(f".dist-info/licenses/{filename}")]
+                sdist_paths = [n for n in sdist_names if n.count("/") == 1 and n.endswith(f"/{filename}")]
+                assert len(wheel_paths) == 1, (filename, wheel_paths)
+                assert len(sdist_paths) == 1, (filename, sdist_paths)
+                assert wheel.read(wheel_paths[0]) == expected, filename
+                assert sdist.extractfile(sdist_paths[0]).read() == expected, filename
+            metadata_path = next(n for n in wheel_names if n.endswith(".dist-info/METADATA"))
+            metadata = Parser().parsestr(wheel.read(metadata_path).decode("utf-8"))
+            assert metadata["License-Expression"] == "MIT"
+            assert set(metadata.get_all("License-File")) == {"LICENSE.txt", "THIRD_PARTY_NOTICES.txt"}
         PY
 
     - name: Install the wheel into a clean environment

@@ -28,6 +28,9 @@ from numba.typed import List
 
 # vanilla_option_pricers
 from vanilla_option_pricers.utils import ncdf, npdf, ncdf_inv
+from vanilla_option_pricers._black import (
+    _implied_total_vol, _log_moneyness, _normalised_black,
+)
 
 
 @njit
@@ -103,25 +106,20 @@ def compute_bsm_vanilla_price(forward: float,
     NotImplementedError
         if `optiontype` is not one of 'C', 'P', 'IC', 'IP'.
     """
-    if is_intrinsic(ttm=ttm, vol=vol):
-        if optiontype == 'C' or optiontype == 'IC':
-            price = np.maximum(forward - strike, 0.0)
-        elif optiontype == 'P' or optiontype == 'IP':
-            price = np.maximum(strike - forward, 0.0)
-        else:
-            raise NotImplementedError(f"optiontype")
-
+    if optiontype == 'C' or optiontype == 'IC':
+        intrinsic = max(forward - strike, 0.0)
+    elif optiontype == 'P' or optiontype == 'IP':
+        intrinsic = max(strike - forward, 0.0)
     else:
-        s_ttm = vol * np.sqrt(ttm)
-        d1 = (np.log(forward / strike) + 0.5 * s_ttm * s_ttm) / s_ttm
-        d2 = d1 - s_ttm
-        if optiontype == 'C' or optiontype == 'IC':
-            price = discfactor * (forward * ncdf(d1) - strike * ncdf(d2))
-        elif optiontype == 'P' or optiontype == 'IP':
-            price = -discfactor * (forward * ncdf(-d1) - strike * ncdf(-d2))
-        else:
-            raise NotImplementedError(f"optiontype")
-    return price
+        raise NotImplementedError("optiontype")
+    if is_intrinsic(ttm=ttm, vol=vol):
+        return discfactor * intrinsic
+    if forward <= 0 or strike <= 0:
+        return np.nan
+    x = -abs(_log_moneyness(forward, strike))
+    scale = np.sqrt(forward) * np.sqrt(strike)
+    time_value = scale * _normalised_black(x, vol * np.sqrt(ttm))
+    return discfactor * (intrinsic + time_value)
 
 
 compute_bsm_vanilla_price_vector = np.vectorize(compute_bsm_vanilla_price, doc='Vectorized `compute_bsm_vanilla_price`')
@@ -756,16 +754,15 @@ def infer_bsm_implied_vol(forward: float,
                           is_bounds_to_nan: bool = True
                           ) -> float:
     """
-    bsm implied vol from a price, by safeguarded Newton (Newton-Raphson with bisection
-    fallback) on the bracket [vol_lower, vol_upper].
+    Black implied volatility from Jaeckel's transformed rational initial guess.
 
-    Newton uses the analytic discounted vega d(price)/d(vol) = discfactor*F*n(d1)*sqrt(ttm);
-    a step leaving the bracket, or one that fails to reduce the residual, falls back to
-    bisection. For a vanilla in-the-money option the out-of-the-money counterpart is
-    inverted via put-call parity C - P = discfactor*(F - K) for better conditioning; the
-    implied vol is identical for the two by parity. Typical convergence is 5-8 pricer
-    evaluations; terminal accuracy depends on conditioning, the requested tolerance,
-    and floating-point rounding.
+    The private normalized OTM kernel follows Let's Be Rational, sections 3-4,
+    reference revision 1520 (2024). Usually two Householder corrections attain
+    float64 accuracy; the ATM case uses sqrt(8/T)*erfinv(price/(discfactor*F)).
+    Put-call parity removes intrinsic once and all subsequent evaluations use
+    the OTM formula. The final volatility must lie in [vol_lower, vol_upper].
+    Input rounding limits accuracy near intrinsic and the maximum price; lost
+    time value cannot be recovered. See http://www.jaeckel.org/LetsBeRational.pdf.
 
     Parameters
     ----------
@@ -780,7 +777,7 @@ def infer_bsm_implied_vol(forward: float,
     discfactor : float, default 1.0
         discount factor exp(-r*ttm).
     optiontype : str, default 'C'
-        'C'/'P' (parity switch applied) or 'IC'/'IP' (inverted directly).
+        'C'/'IC' or 'P'/'IP'; the existing payoff normalization is retained.
     tol : float, default 1e-8
         absolute convergence tolerance on the implied vol.
     vol_lower : float, default 0.01
@@ -798,68 +795,50 @@ def infer_bsm_implied_vol(forward: float,
         implied vol, or np.nan if the price is outside the achievable range and
         `is_bounds_to_nan` is True.
     """
-    # non-positive prices carry no vol information
     if np.isnan(given_price) or given_price <= 0.0:
         return np.nan if is_bounds_to_nan else vol_lower
-
-    # Invert the OTM counterpart for vanillas via put-call parity for conditioning. Keep
-    # the caller's fixed-width NumPy string type unchanged: assigning a Python string
-    # literal to it cannot be lowered by Numba when this scalar solver is called from a
-    # compiled chain loop.
-    target = given_price
-    price_offset = 0.0
-    if optiontype == 'C' and strike < forward:
-        price_offset = discfactor * (forward - strike)
-        target = given_price - price_offset
-    elif optiontype == 'P' and strike > forward:
-        price_offset = discfactor * (strike - forward)
-        target = given_price - price_offset
-    if target <= 0.0:
-        return np.nan if is_bounds_to_nan else vol_lower
-
-    sqrt_ttm = np.sqrt(ttm)
-    f_lo = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_lower, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-    f_hi = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=vol_upper, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-    if f_lo * f_hi > 0.0:  # price not bracketed by [vol_lower, vol_upper]
-        if is_bounds_to_nan:
-            return np.nan
-        return vol_lower if f_lo > 0.0 else vol_upper
-
-    # orient bracket so the residual is negative at xl (price increases in vol)
-    if f_lo < 0.0:
-        xl, xh = vol_lower, vol_upper
+    if optiontype == 'C' or optiontype == 'IC':
+        intrinsic, maximum = max(forward - strike, 0.0), forward
+    elif optiontype == 'P' or optiontype == 'IP':
+        intrinsic, maximum = max(strike - forward, 0.0), strike
     else:
-        xl, xh = vol_upper, vol_lower
-    rts = 0.5 * (vol_lower + vol_upper)
-    dx_old = np.abs(vol_upper - vol_lower)
-    dx = dx_old
-    f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-    d1 = np.log(forward / strike) / (rts * sqrt_ttm) + 0.5 * rts * sqrt_ttm
-    df = discfactor * forward * npdf(d1) * sqrt_ttm
-    for _ in range(max_iters):
-        if ((rts - xh) * df - f) * ((rts - xl) * df - f) > 0.0 or np.abs(2.0 * f) > np.abs(dx_old * df):
-            dx_old = dx
-            dx = 0.5 * (xh - xl)
-            rts = xl + dx
-            if xl == rts:
-                break
-        else:
-            dx_old = dx
-            dx = f / df
-            temp = rts
-            rts = rts - dx
-            if temp == rts:
-                break
-        if np.abs(dx) < tol:
-            break
-        f = compute_bsm_vanilla_price(forward=forward, strike=strike, ttm=ttm, vol=rts, discfactor=discfactor, optiontype=optiontype) - price_offset - target
-        d1 = np.log(forward / strike) / (rts * sqrt_ttm) + 0.5 * rts * sqrt_ttm
-        df = discfactor * forward * npdf(d1) * sqrt_ttm
-        if f < 0.0:
-            xl = rts
-        else:
-            xh = rts
-    return rts
+        raise NotImplementedError("optiontype")
+    if (not np.isfinite(forward) or not np.isfinite(strike)
+            or not np.isfinite(ttm) or not np.isfinite(discfactor)
+            or forward <= 0 or strike <= 0 or ttm <= 0 or discfactor <= 0
+            or vol_lower < 0 or vol_upper < vol_lower):
+        return np.nan
+    # Subtract the observed intrinsic once, then evaluate only the OTM kernel.
+    # No option-code reassignment: NumPy fixed-width strings remain Numba-compatible.
+    target = given_price - discfactor * intrinsic
+    if target <= 0:
+        return np.nan if is_bounds_to_nan else vol_lower
+    if given_price >= discfactor * maximum:
+        return np.nan if is_bounds_to_nan else vol_upper
+    scale = np.sqrt(forward) * np.sqrt(strike)
+    beta = (target / discfactor) / scale
+    x = -abs(_log_moneyness(forward, strike))
+    sqrt_ttm = np.sqrt(ttm)
+    if max_iters <= 0:
+        if beta < _normalised_black(x, vol_lower * sqrt_ttm):
+            return np.nan if is_bounds_to_nan else vol_lower
+        if beta > _normalised_black(x, vol_upper * sqrt_ttm):
+            return np.nan if is_bounds_to_nan else vol_upper
+        return 0.5 * (vol_lower + vol_upper)
+    if beta <= 0 or beta >= np.exp(x/2):
+        return np.nan if is_bounds_to_nan else (vol_lower if beta <= 0 else vol_upper)
+    # Form the upper-price gap before normalization to retain its small value.
+    complement = ((discfactor * maximum - given_price) / discfactor) / scale
+    total_vol = _implied_total_vol(beta, x, max_iters, tol * sqrt_ttm, complement)
+    vol = total_vol / sqrt_ttm
+    # Allow only floating-point endpoint noise; the public bracket is unchanged.
+    lower_slack = 8 * np.finfo(np.float64).eps * max(abs(vol), abs(vol_lower))
+    upper_slack = 8 * np.finfo(np.float64).eps * max(abs(vol), abs(vol_upper))
+    if vol < vol_lower - lower_slack:
+        return np.nan if is_bounds_to_nan else vol_lower
+    if vol > vol_upper + upper_slack:
+        return np.nan if is_bounds_to_nan else vol_upper
+    return min(max(vol, vol_lower), vol_upper)
 
 
 @njit

@@ -26,9 +26,15 @@ The package avoids SciPy so the numerical helpers can compile under Numba:
 | `npdf` | Direct `exp(-x*x/2) / sqrt(2*pi)` evaluation. | Subject to ordinary floating-point underflow in extreme tails. |
 | Internal `ncdf_inv` / `inv_erf` | Acklam piecewise rational normal quantile plus one lower-tail Halley refinement; `inv_erf` adds a central series and tail-stable mapping. | Near-double-precision delta-to-strike conversion across the representable probability range. |
 
-The `erfcc`, `ncdf`, `ncdf_inv`, and `inv_erf` ufuncs do not enable Numba `fastmath`. `npdf` and
-the Bachelier kernels retain their existing `fastmath=True` compilation. Do not assume bitwise
-identity across platforms: the C-library special functions and generated machine code can differ.
+The distribution ufuncs, stable Black kernels, Bachelier scalar price, and scalar IV solvers
+do not enable Numba `fastmath`. Some existing Greek and array helpers retain it. Do not assume
+bitwise identity across platforms: special functions and generated machine code can differ.
+
+The unreleased Black kernel uses normalized OTM prices, small-volatility and asymptotic
+expansions, and scaled complementary error functions from Jaeckel's 2024 reference source.
+Bachelier time value uses a stable approximation to the OTM price divided by its Gaussian density.
+Independent fixtures were generated with mpmath at 110 decimal digits from the defining
+Gaussian-integral formulas. Runtime tests need no additional numerical dependency.
 
 ## Executed public-API check
 
@@ -94,7 +100,7 @@ Expected output in the verified environment:
 
 ```text
 ncdf_max_abs=5.551e-17 strike_max_abs=2.842e-14 strike_max_rel=2.025e-16
-bsm_intrinsic=5.000000 unbracketed_is_nan=True
+bsm_intrinsic=4.750000 unbracketed_is_nan=True
 zero_iters=2.505000
 ```
 
@@ -109,17 +115,16 @@ it does not establish convergence.
 
 BSM `is_intrinsic` is true when `ttm <= 0`, `vol <= 0`, or `vol` is `nan`.
 
-- BSM vanilla price returns raw `max(F-K, 0)` or `max(K-F, 0)` on that branch; the current branch
-  does not apply `discfactor`.
+- BSM vanilla price returns `discfactor * max(F-K, 0)` or
+  `discfactor * max(K-F, 0)` on that branch (corrected in the unreleased version).
 - BSM delta returns its raw `0`, `1`, or `-1` limit; gamma, vega, and theta return zero. Digital
   price returns a raw `0`/`1` indicator.
-- Bachelier functions do not share this guard. Zero and negative forwards are supported, but
-  maturity and absolute volatility must produce a positive standard deviation; a zero scale can
-  divide by zero.
+- Bachelier scalar pricing also returns discounted intrinsic for nonpositive maturity or
+  volatility. Zero and negative forwards remain supported. Its other analytics still require
+  the positive-standard-deviation domain documented by their individual functions.
 
-These are current source behaviors, not settlement-policy recommendations. Handle expired
-contracts and discounting deliberately outside the package when the raw intrinsic convention is
-not the desired one.
+These are numerical boundary conventions, not settlement-policy recommendations. Callers own
+expiry and settlement handling; the Greek and digital boundary conventions are unchanged.
 
 ## Implied-volatility solver limits
 
@@ -130,10 +135,11 @@ not the desired one.
 | Default `max_iters` | `100` | `100` |
 | Unbracketed/non-positive target | `nan` by default | `nan` by default |
 
-Both scalar solvers use safeguarded Newton steps with bisection fallback. Vanilla in-the-money
-`C`/`P` targets are converted to the out-of-the-money parity counterpart; `IC`/`IP` targets are
-inverted directly. With `is_bounds_to_nan=False`, an unbracketed target returns the violated bound
-rather than proof of a root.
+Black uses a transformed rational guess and Householder corrections, with a direct ATM inverse;
+Bachelier retains safeguarded Newton and bisection. Both use OTM time value internally, including
+the existing call/put payoff branches used by `IC`/`IP`. With `is_bounds_to_nan=False`, a target
+outside the requested volatility bounds returns the violated bound rather than proof of a root.
+See [Jaeckel, Let's Be Rational](http://www.jaeckel.org/LetsBeRational.pdf) for the Black method.
 
 Low vega, very short maturity, deep moneyness, near-intrinsic prices, approximation error, and
 rounded market quotes can dominate a small `tol`. Always reprice the returned volatility and
@@ -156,6 +162,12 @@ the compiled slice function and the `numpy.vectorize` convenience wrapper, check
 prices agree, reports their warm speed ratio, and records the platform and package versions. No
 competitor or universal speed claim follows from that output. The module explicitly opts out of
 pytest collection.
+
+`examples/performance/bsm_iv_comparison.py` compares the current Black IV solver with an
+unchanged `black_scholes.py` supplied through `--baseline`. Pass `--output` for its JSON record.
+It warms identical compiled loops, alternates measurement order, and records median timings,
+source hashes, nonfinite results, and IV errors on deterministic synthetic inputs. Obtain the
+baseline from the Git revision being compared. The script requires no benchmark dependency.
 
 See the [array and Numba guide](array_shapes_and_numba.md), [API inventory](api.md),
 [numerical helper source](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/src/vanilla_option_pricers/utils.py),
