@@ -1,8 +1,8 @@
 # Committing with GitHub Desktop
 
-*Author: [Artur Sepp](https://github.com/ArturSepp)*
+*Author: [Artur Sepp](https://github.com/ArturSepp) / First recorded: [2026-09-21](https://github.com/ArturSepp/VanillaOptionPricers/commit/e2aac3fd3743c5193a1827c73f22e4ea700c6f83)*
 
-Project: [vanilla_option_pricers](https://github.com/ArturSepp/VanillaOptionPricers).
+Implemented in [vanilla-option-pricers](https://github.com/ArturSepp/VanillaOptionPricers).
 Software citation: [CITATION.cff](https://github.com/ArturSepp/VanillaOptionPricers/blob/main/CITATION.cff).
 
 Create a working branch, select the intended changes, and commit normally. The installed

@@ -4,20 +4,25 @@ Entries start at 1.2.4. For earlier releases see the git log.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-25
+
 ### Changed
 
-- Black pricing and implied volatility use internal Numba kernels adapted from Peter
+- `compute_bsm_vanilla_price` and `infer_bsm_implied_vol` use internal Numba kernels adapted from Peter
   Jaeckel's Let's Be Rational revision 1520 (2024): stable normalized OTM pricing,
   rational initial guesses, transformed tail objectives, and Householder refinement.
   ATM pricing/inversion use the error function and its inverse. Public signatures,
   default volatility bounds, option codes, and NumPy/Numba dependencies are unchanged.
+- Documentation builds retain their own stable/latest canonical URLs and show the package
+  version in the site title. Reader pages include verified author/date and software-citation links.
 
 ### Fixed
 
-- Bachelier prices evaluate the OTM time value without subtracting the CDF from one,
-  eliminating negative and inaccurate far-OTM put prices. Both IV solvers actually
-  evaluate the OTM counterpart after removing observed intrinsic value.
-- Zero-diffusion Black and Bachelier prices return discounted intrinsic value.
+- `compute_normal_price` evaluates the OTM time value without subtracting the CDF from one,
+  eliminating negative and inaccurate far-OTM put prices. `infer_bsm_implied_vol` and
+  `infer_normal_implied_vol` evaluate the OTM counterpart after removing observed intrinsic value.
+- Zero-diffusion `compute_bsm_vanilla_price` and `compute_normal_price` return discounted
+  intrinsic value.
 
 ### Added
 
@@ -25,6 +30,8 @@ Entries start at 1.2.4. For earlier releases see the git log.
   tiny total volatility, scale changes, inverse option codes, and near-maximum prices.
 - A reproducible compiled-batch benchmark against a preserved pre-change Black solver;
   initialization/compilation are excluded and accuracy is reported alongside timing.
+- Scoped third-party attribution and license notices are included in both source and wheel
+  distributions.
 
 
 ## [2.2.1] - 2026-10-07

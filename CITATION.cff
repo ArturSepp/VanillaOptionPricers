@@ -9,8 +9,8 @@ authors:
 repository-code: "https://github.com/ArturSepp/VanillaOptionPricers"
 url: "https://pypi.org/project/vanilla-option-pricers/"
 license: MIT
-version: "2.2.1"
-date-released: "2026-10-07"
+version: "2.3.0"
+date-released: "2026-10-25"
 keywords:
   - option-pricing
   - implied-volatility
